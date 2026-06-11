@@ -121,12 +121,12 @@ def fetch_ai_news():
             'name': 'Bloomberg'
         },
         {
-            'url': 'https://feeds2.wired.com/feed/category/ai/rss',
-            'name': 'Wired'
-        },
-        {
             'url': 'https://feeds.theverge.com/theverge/index.xml',
             'name': 'The Verge'
+        },
+        {
+            'url': 'https://feeds.arstechnica.com/arstechnica/index',
+            'name': 'Ars Technica'
         },
     ]
 

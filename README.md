@@ -54,9 +54,10 @@ ai_daily_report_1/
 
 1. **Hacker News** - 기술 뉴스 커뮤니티
 2. **Bloomberg** - 비즈니스/기술 뉴스
-3. **Wired** - 기술/과학 잡지
+3. **The Verge** - 기술 뉴스
+4. **Ars Technica** - 기술/과학 뉴스 (안정성 개선)
 
-더 많은 소스를 추가하려면 `news-fetcher.js`의 `sources` 배열을 수정하세요.
+더 많은 소스를 추가하려면 `news_fetcher.py`의 `sources` 배열을 수정하세요.
 
 ## 📝 로그
 
