@@ -1,7 +1,7 @@
 # GitHub Issue Creator Skill
 
 ## Metadata
-- **name**: git_issue
+- **name**: issue-writer
 - **description**: GitHub 레포지토리에 이슈를 신속하게 생성합니다
 - **version**: 1.0.0
 
