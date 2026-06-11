@@ -1,0 +1,15 @@
+{
+  "name": "ai-daily-news-report",
+  "version": "1.0.0",
+  "description": "AI 동향 최신 뉴스를 매일 자동으로 수집하여 HTML로 생성",
+  "main": "news-fetcher.js",
+  "scripts": {
+    "fetch": "node news-fetcher.js",
+    "test": "node news-fetcher.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "cheerio": "^1.0.0-rc.12",
+    "date-fns": "^2.30.0"
+  }
+}
