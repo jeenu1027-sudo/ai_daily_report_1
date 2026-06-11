@@ -17,7 +17,8 @@
 ai_daily_report_1/
 ├── .claude/
 │   └── skills/
-│       └── git_issue.md           # GitHub 이슈 생성 스킬
+│       ├── issue-writer.md        # GitHub 이슈 생성 스킬
+│       └── issue-runner.md        # GitHub 이슈 분석 및 수정 스킬
 ├── news_fetcher.py                # 메인 뉴스 수집 스크립트
 ├── run_news_fetcher.bat           # Windows 배치 파일
 ├── setup_schedule.ps1             # 스케줄 설정 스크립트
@@ -46,7 +47,7 @@ pip install -r requirements.txt
 
 ### 사용 가능한 스킬
 
-#### 1. `git_issue` - GitHub 이슈 생성 스킬
+#### 1. `issue-writer` - GitHub 이슈 생성 스킬
 
 **설명**: GitHub 레포지토리(jeenu1027-sudo/ai_daily_report_1)에 이슈를 자동으로 생성합니다.
 
@@ -54,7 +55,7 @@ pip install -r requirements.txt
 ```
 사용자: "버그 리포트를 이슈로 등록해줘: 뉴스 수집 시 타임아웃 에러 발생"
 
-Claude: git_issue 스킬 실행
+Claude: issue-writer 스킬 실행
 → GitHub 이슈 생성
 → 이슈 URL 반환
 ```
@@ -62,7 +63,7 @@ Claude: git_issue 스킬 실행
 **파라미터**:
 - **title** (필수): 이슈 제목
 - **description** (필수): 이슈 상세 설명
-- **labels** (선택): 라벨 (bug, enhancement, feature, documentation 등)
+- **labels** (선택): 라벨 (bug, enhancement, documentation 등)
 - **assignee** (선택): 담당자 (GitHub username)
 
 **사용 시나리오**:
@@ -70,7 +71,84 @@ Claude: git_issue 스킬 실행
 - "기능 요청 이슈 생성해줘"
 - "문서 업데이트 이슈를 등록해줘"
 
-자세한 정보는 [git_issue.md](./.claude/skills/git_issue.md) 참고
+자세한 정보는 [issue-writer.md](./.claude/skills/issue-writer.md) 참고
+
+---
+
+#### 2. `issue-runner` - GitHub 이슈 분석 및 수정 스킬
+
+**설명**: GitHub에 등록된 이슈를 확인하고, 수정 계획을 수립한 후 실제 코드를 변경합니다.
+
+**사용 예시**:
+```
+사용자: "등록된 이슈들을 분석하고 버그를 수정해줘"
+
+Claude: issue-runner 스킬 실행
+1. 열린 이슈 목록 조회
+2. 각 이슈 상세 분석
+3. 수정 계획 수립
+4. 코드 구현 및 테스트
+5. 문서 업데이트
+6. 커밋 및 푸시
+```
+
+**파라미터**:
+- **action** (필수): analyze|plan|implement|specific
+  - `analyze`: 이슈 분석만 수행
+  - `plan`: 분석 후 수정 계획 수립
+  - `implement`: 완전 수정 (분석→계획→구현)
+  - `specific`: 특정 이슈만 처리
+
+- **issue_number** (선택): 특정 이슈 번호 (예: 1, 2, 3)
+- **labels** (선택): 특정 라벨 필터 (bug, enhancement 등)
+- **create_pr** (선택): Pull Request 자동 생성 여부
+
+**사용 시나리오**:
+- "등록된 이슈를 분석해줘"
+- "Issue #2 버그를 수정해줘"
+- "모든 버그를 수정해줘"
+- "Issue #1의 수정 계획을 세워줘"
+
+**Workflow**:
+```
+1. 이슈 목록 조회
+   ↓
+2. 이슈 상세 분석
+   ↓
+3. 수정 계획 수립
+   ↓
+4. 코드 구현/수정
+   ↓
+5. 테스트 및 검증
+   ↓
+6. 문서 업데이트
+   ↓
+7. 커밋 및 푸시
+   ↓
+8. Pull Request 생성 (선택)
+```
+
+자세한 정보는 [issue-runner.md](./.claude/skills/issue-runner.md) 참고
+
+---
+
+## 🎯 스킬 사용 흐름도
+
+```
+이슈 발견
+   ↓
+issue-writer 스킬 → 이슈 등록
+   ↓
+issue-runner 스킬 (action=analyze) → 이슈 분석
+   ↓
+issue-runner 스킬 (action=plan) → 수정 계획 수립
+   ↓
+issue-runner 스킬 (action=implement) → 코드 수정
+   ↓
+✅ 완료 (커밋 및 푸시)
+```
+
+---
 
 ## 📝 스킬 개발 가이드
 
