@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 import sys
 import io
+import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Tuple
 
 # UTF-8 인코딩 설정
 if sys.platform == 'win32':
@@ -11,7 +13,10 @@ if sys.platform == 'win32':
 
 OUTPUT_DIR = Path(__file__).parent
 
-def generate_morning_briefing():
+# 로거 설정
+logger = logging.getLogger(__name__)
+
+def generate_morning_briefing() -> Tuple[str, str]:
     """아침 브리핑 리포트 생성"""
     today = datetime.now()
     formatted_date = today.strftime('%Y년 %m월 %d일')
@@ -351,7 +356,30 @@ def main():
         return 0
 
     except Exception as e:
-        print(f"❌ 오류 발생: {str(e)}")
+        logger.error(f"오류 발생: {str(e)}", exc_info=True)
+        return 1
+
+def main() -> int:
+    """
+    메인 함수
+
+    Returns:
+        0 (성공) 또는 1 (실패)
+    """
+    logger.info("아침 브리핑 리포트 생성 시작")
+
+    try:
+        html_content, file_name = generate_morning_briefing()
+        file_path = OUTPUT_DIR / f"{file_name}.html"
+
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+        logger.info(f"리포트 생성 완료: {file_path}")
+        return 0
+
+    except Exception as e:
+        logger.error(f"오류 발생: {str(e)}", exc_info=True)
         return 1
 
 if __name__ == '__main__':

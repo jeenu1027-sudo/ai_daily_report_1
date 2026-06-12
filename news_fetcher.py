@@ -4,6 +4,10 @@
 import os
 import sys
 import io
+import logging
+import time
+from functools import wraps
+from typing import List, Dict, Tuple, Optional
 
 # UTF-8 인코딩 설정
 if sys.platform == 'win32':
@@ -16,6 +20,28 @@ from datetime import datetime
 from pathlib import Path
 
 OUTPUT_DIR = Path(__file__).parent
+LOG_DIR = OUTPUT_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
+# 로거 설정
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# 파일 핸들러
+log_file = LOG_DIR / "news_fetcher.log"
+fh = logging.FileHandler(log_file, encoding='utf-8')
+fh.setLevel(logging.INFO)
+fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S'))
+
+# 콘솔 핸들러
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+
+# 기존 핸들러 제거 (중복 방지)
+logger.handlers.clear()
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 # AI 뉴스 관련 키워드 (한글)
 AI_KEYWORDS = [
@@ -64,7 +90,26 @@ GITHUB_KEYWORDS = [
     'github.com', 'repo', 'fork', 'star'
 ]
 
-def get_category(title):
+def retry_with_backoff(max_retries: int = 3, base_delay: int = 1):
+    """Exponential backoff를 사용한 재시도 데코레이터"""
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            delay = base_delay
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except requests.RequestException as e:
+                    if attempt == max_retries - 1:
+                        logger.error(f"최종 실패 ({max_retries}회 재시도): {str(e)}")
+                        raise
+                    logger.warning(f"재시도 {attempt+1}/{max_retries} (대기 {delay}초)... - {str(e)[:50]}")
+                    time.sleep(delay)
+                    delay *= 2
+            return None
+        return wrapper
+    return decorator
+
+def get_category(title: str) -> str:
     """뉴스 제목 기반 한글 카테고리 생성"""
     title_lower = title.lower()
     for keyword, category in CATEGORY_MAPPING.items():
@@ -72,27 +117,111 @@ def get_category(title):
             return category
     return 'AI 뉴스'
 
-def is_ai_related(title, description=''):
+def is_ai_related(title: str, description: str = '') -> bool:
     """AI 관련 뉴스인지 확인"""
     text = (title + ' ' + description).lower()
     return any(keyword.lower() in text for keyword in AI_KEYWORDS)
 
-def is_generated_by_ai(title, description=''):
+def is_generated_by_ai(title: str, description: str = '') -> bool:
     """AI가 생성한 기사인지 감지"""
     text = (title + ' ' + description).lower()
     return any(keyword.lower() in text for keyword in AI_GENERATED_KEYWORDS)
 
-def is_academic_paper(title, description=''):
+def is_academic_paper(title: str, description: str = '') -> bool:
     """논문/학술자료인지 감지"""
     text = (title + ' ' + description).lower()
     return any(keyword.lower() in text for keyword in ACADEMIC_KEYWORDS)
 
-def is_github_content(title, description=''):
+def is_github_content(title: str, description: str = '') -> bool:
     """GitHub 콘텐츠인지 감지"""
     text = (title + ' ' + description).lower()
     return any(keyword.lower() in text for keyword in GITHUB_KEYWORDS)
 
-def fetch_korean_news_sources():
+def calculate_quality_score(
+    title: str,
+    description: str = '',
+    source: str = '',
+    published_date: Optional[str] = None
+) -> int:
+    """
+    뉴스 기사의 품질 점수 계산 (0-100점)
+
+    신선도(30점) + 길이(40점) + 출처신뢰도(30점) = 최대 100점
+
+    Args:
+        title: 기사 제목
+        description: 기사 설명/본문
+        source: 출처명
+        published_date: 게시 날짜 (ISO format)
+
+    Returns:
+        품질 점수 (0-100)
+    """
+    score = 0
+
+    # 신선도 점수 (0-30점) - 기본값 30점 (최근 뉴스 가정)
+    if published_date:
+        try:
+            pub_date = datetime.fromisoformat(published_date)
+            age_days = (datetime.now() - pub_date).days
+            if age_days == 0:
+                score += 30
+            elif age_days <= 7:
+                score += 20
+            elif age_days <= 30:
+                score += 10
+            else:
+                score += 5
+        except Exception:
+            score += 25  # 파싱 실패 시에도 충분한 점수
+    else:
+        score += 30  # 날짜 없으면 최근 뉴스로 가정
+
+    # 길이 점수 (0-40점)
+    content_length = len(description.split())
+    if content_length >= 500:
+        score += 40
+    elif content_length >= 300:
+        score += 20
+    elif content_length >= 100:
+        score += 10
+    else:
+        score += 5  # 매우 짧은 설명도 기본 점수
+
+    # 출처 신뢰도 (0-30점)
+    trusted_sources = ['VentureSquare', 'ZDNet', 'IT World', 'Hankyoreh']
+    if any(trusted in source for trusted in trusted_sources):
+        score += 30
+    else:
+        score += 15
+
+    return min(score, 100)
+
+def measure_filtering_effectiveness(
+    original_items: List[Dict[str, str]],
+    filtered_items: List[Dict[str, str]]
+) -> Dict[str, float]:
+    """필터링 전후 효과 측정"""
+    quality_scores = [
+        calculate_quality_score(
+            item.get('title', ''),
+            item.get('description', ''),
+            item.get('source', '')
+        )
+        for item in filtered_items
+    ]
+
+    filter_rate = len(filtered_items) / len(original_items) if original_items else 0
+    avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else 0
+
+    return {
+        'total_original': len(original_items),
+        'total_filtered': len(filtered_items),
+        'filter_rate': filter_rate,
+        'avg_quality_score': round(avg_quality, 1)
+    }
+
+def fetch_korean_news_sources() -> List[Dict[str, str]]:
     """한국 AI 뉴스 소스 통합 수집"""
     korean_sources = [
         {
@@ -128,32 +257,66 @@ def fetch_korean_news_sources():
                 not is_generated_by_ai(title) and
                 not is_academic_paper(title) and
                 not is_github_content(title)):
+                # 품질 점수 계산 후 추가
+                item['quality_score'] = calculate_quality_score(
+                    title,
+                    item.get('description', ''),
+                    item.get('source', '')
+                )
                 filtered_news.append(item)
         all_news.extend(filtered_news)
 
     return all_news
 
-def fetch_rss_feed(feed_url, source_name):
-    """RSS 피드에서 뉴스 수집"""
+@retry_with_backoff(max_retries=3, base_delay=1)
+def fetch_rss_feed(feed_url: str, source_name: str) -> List[Dict[str, str]]:
+    """
+    RSS 피드에서 뉴스 수집
+
+    Args:
+        feed_url: RSS 피드 URL
+        source_name: 뉴스 출처명
+
+    Returns:
+        뉴스 항목 리스트 (title, url, source, category, quality_score)
+
+    Raises:
+        requests.RequestException: 네트워크 오류 시
+        ET.ParseError: XML 파싱 오류 시
+    """
+    logger.info(f"수집 중: {source_name}")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+
     try:
-        print(f"📰 {source_name}에서 뉴스를 수집 중...")
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
         response = requests.get(feed_url, headers=headers, timeout=10)
+        response.raise_for_status()
+    except requests.Timeout:
+        logger.error(f"타임아웃: {source_name} (10초 초과)")
+        return []
+    except requests.ConnectionError:
+        logger.error(f"연결 오류: {source_name}")
+        return []
+    except requests.HTTPError:
+        logger.error(f"HTTP 오류: {source_name} - {response.status_code}")
+        return []
+    except requests.RequestException as e:
+        logger.error(f"요청 오류: {source_name} - {str(e)[:100]}")
+        return []
+
+    try:
         response.encoding = 'utf-8'
-
         root = ET.fromstring(response.content)
-        news = []
+    except ET.ParseError as e:
+        logger.error(f"파싱 오류: {source_name} - {str(e)[:100]}")
+        return []
 
-        # RSS/Atom 네임스페이스 처리
-        namespaces = {
-            '': 'http://www.w3.org/2005/Atom',
-            'content': 'http://purl.org/rss/1.0/modules/content/'
-        }
+    news = []
 
-        # Atom 형식
-        items = root.findall('.//item') or root.findall('.//{http://www.w3.org/2005/Atom}entry')
+    # RSS/Atom 형식 항목 추출
+    items = root.findall('.//item') or root.findall('.//{http://www.w3.org/2005/Atom}entry')
 
-        for item in items[:15]:
+    for item in items[:15]:
+        try:
             title_elem = item.find('title')
             if title_elem is None:
                 title_elem = item.find('{http://www.w3.org/2005/Atom}title')
@@ -174,18 +337,20 @@ def fetch_rss_feed(feed_url, source_name):
                     'title': title[:100],
                     'url': link[:500] if link else '',
                     'source': source_name,
-                    'category': get_category(title)
+                    'category': get_category(title),
+                    'description': ''
                 })
+        except Exception as e:
+            logger.debug(f"항목 파싱 실패: {str(e)[:50]}")
+            continue
 
-        return news[:3]
-    except Exception as e:
-        print(f"❌ {source_name} 수집 실패: {str(e)}")
-        return []
+    logger.info(f"수집 완료: {source_name} ({len(news)}개)")
+    return news[:3]
 
 
-def fetch_ai_news():
+def fetch_ai_news() -> List[Dict[str, str]]:
     """한국 AI 뉴스만 수집"""
-    print("📰 한국 AI 뉴스를 수집 중...\n")
+    logger.info("한국 AI 뉴스 수집 시작")
 
     # 한국 뉴스 소스에서만 수집
     news_items = fetch_korean_news_sources()
@@ -200,10 +365,20 @@ def fetch_ai_news():
             unique_news.append(item)
 
     # 최대 15개 반환
-    return unique_news[:15]
+    result = unique_news[:15]
+    logger.info(f"수집 완료: 총 {len(result)}개 뉴스")
+    return result
 
-def generate_html(news_items):
-    """현대적인 디자인의 HTML 리포트 생성"""
+def generate_html(news_items: List[Dict[str, str]]) -> Tuple[str, str]:
+    """
+    현대적인 디자인의 HTML 리포트 생성
+
+    Args:
+        news_items: 뉴스 항목 리스트
+
+    Returns:
+        (HTML 내용, 파일명)
+    """
     today = datetime.now()
     formatted_date = today.strftime('%Y년 %m월 %d일')
     file_name = f"ai-news-digest-{today.strftime('%Y-%m-%d')}"
@@ -633,21 +808,29 @@ def generate_html(news_items):
 
     return html_content, file_name
 
-def main():
-    """메인 함수"""
-    print("🚀 AI 뉴스 수집을 시작합니다...\n")
+def main() -> int:
+    """
+    메인 함수
+
+    Returns:
+        0 (성공) 또는 1 (실패)
+    """
+    logger.info("=" * 60)
+    logger.info("AI 뉴스 수집 시작")
+    logger.info("=" * 60)
 
     try:
         # 뉴스 수집
         news_items = fetch_ai_news()
 
         if not news_items:
-            print("⚠️  뉴스를 찾을 수 없습니다. 샘플 데이터를 사용합니다.")
+            logger.warning("수집된 뉴스가 없습니다. 샘플 데이터를 사용합니다.")
             news_items = [{
                 'title': 'AI 기술이 빠르게 발전하고 있습니다',
                 'url': 'https://example.com',
                 'source': 'Sample',
-                'category': 'AI 뉴스'
+                'category': 'AI 뉴스',
+                'quality_score': 50
             }]
 
         # HTML 생성
@@ -658,14 +841,16 @@ def main():
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
 
-        print(f"✅ 완료! 파일이 생성되었습니다:")
-        print(f"   📄 {file_path}")
-        print(f"   📰 총 {len(news_items)}개의 뉴스가 수집되었습니다.\n")
+        logger.info(f"파일 저장: {file_path}")
+        logger.info(f"수집된 뉴스: {len(news_items)}개")
+        logger.info("=" * 60)
+        logger.info("AI 뉴스 수집 완료")
+        logger.info("=" * 60)
 
         return 0
 
     except Exception as e:
-        print(f"❌ 오류 발생: {str(e)}")
+        logger.critical(f"예상 외 오류 발생: {type(e).__name__}: {str(e)}", exc_info=True)
         return 1
 
 if __name__ == '__main__':

@@ -3,11 +3,16 @@
 import sys
 import io
 import json
+import logging
 from datetime import datetime
+from typing import List, Dict, Optional
 
 # UTF-8 인코딩 설정
 if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
+# 로거 설정
+logger = logging.getLogger(__name__)
 
 # 뉴스 주제 (Step 1에서 수집된 뉴스의 주제들)
 news_topics = ["AI", "인공지능", "머신러닝", "LLM", "Claude", "생성형 AI"]
@@ -40,8 +45,17 @@ issues = [
     }
 ]
 
-def categorize_issue(title, labels):
-    """이슈 카테고리 결정"""
+def categorize_issue(title: str, labels: List[str]) -> str:
+    """
+    이슈 카테고리 결정
+
+    Args:
+        title: 이슈 제목
+        labels: 이슈 레이블 목록
+
+    Returns:
+        카테고리 (bug, test, documentation, feature, task)
+    """
     title_lower = title.lower()
 
     if "bug" in title_lower or "error" in title_lower or "fail" in title_lower:
@@ -57,8 +71,25 @@ def categorize_issue(title, labels):
     else:
         return "task"
 
-def calculate_priority_score(issue, news_topics):
-    """우선순위 점수 계산"""
+def calculate_priority_score(issue: Dict[str, any], news_topics: List[str]) -> Dict[str, float]:
+    """
+    우선순위 점수 계산
+
+    Args:
+        issue: 이슈 정보 (title, labels, createdAt 포함)
+        news_topics: 뉴스 주제 목록
+
+    Returns:
+        우선순위 점수 및 상세 정보
+        {
+            'score': float,
+            'impact': float,
+            'urgency': float,
+            'complexity': float,
+            'news_relevance': float,
+            'category': str
+        }
+    """
     title = issue["title"]
     category = categorize_issue(title, issue["labels"])
 
@@ -110,8 +141,16 @@ def calculate_priority_score(issue, news_topics):
         "category": category
     }
 
-def get_priority_level(score):
-    """점수에 따른 우선순위 레벨"""
+def get_priority_level(score: float) -> str:
+    """
+    점수에 따른 우선순위 레벨
+
+    Args:
+        score: 우선순위 점수 (0-100)
+
+    Returns:
+        우선순위 레벨 문자열
+    """
     if score >= 70:
         return "🔴 Critical"
     elif score >= 50:

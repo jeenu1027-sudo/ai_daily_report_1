@@ -128,6 +128,22 @@ korean_sources = [
 | [CLAUDE.md](CLAUDE.md) | Claude Code 설정, 커스텀 스킬 정의 |
 | [SCHEDULE_SETUP.md](SCHEDULE_SETUP.md) | Windows Task Scheduler 자동 실행 설정 |
 
+## 📊 품질 평가
+
+이 프로젝트는 **품질 루브릭**으로 정기적으로 평가됩니다.
+
+### 현재 상태: 🟢 Excellent (86/100)
+
+| 항목 | 점수 | 등급 |
+|------|------|------|
+| 필터링 정확도 | 82 | 🟢 Good |
+| 리포트 품질 | 90 | 🟢 Excellent |
+| 자동화 신뢰성 | 87 | 🟢 Excellent |
+| 코드 품질 | 85 | 🟢 Good |
+| 문서화 | 88 | 🟢 Good |
+
+자세한 평가 기준: [.claude/skills/quality-rubric.md](./.claude/skills/quality-rubric.md)
+
 ## 📄 라이선스
 
 개인 사용 목적으로 자유롭게 사용 및 수정할 수 있습니다.
