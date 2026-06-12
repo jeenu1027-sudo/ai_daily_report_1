@@ -146,24 +146,24 @@ def fetch_ai_news():
     return unique_news[:10]
 
 def generate_html(news_items):
-    """HTML 리포트 생성"""
+    """현대적인 디자인의 HTML 리포트 생성"""
     today = datetime.now()
     formatted_date = today.strftime('%Y년 %m월 %d일')
     file_name = f"ai-news-digest-{today.strftime('%Y-%m-%d')}"
 
+    # 뉴스 HTML 생성
     news_html = ''
     for idx, news in enumerate(news_items, 1):
         news_html += f'''
       <div class="news-item">
-        <h3>{idx}. {news['title']}</h3>
-        <p class="source">출처: {news['source']}</p>
-        {f'<p class="link"><a href="{news["url"]}" target="_blank">기사 보기 →</a></p>' if news['url'] else ''}
+        <div class="news-number">{idx}</div>
+        <h3>{news['title']}</h3>
+        <div class="news-meta">
+          <span class="source">{news['source']}</span>
+        </div>
+        {f'<a href="{news["url"]}" target="_blank">기사 보기 →</a>' if news['url'] else ''}
       </div>
     '''
-
-    # 뉴스가 없을 경우
-    if not news_html:
-        news_html = '<p style="text-align: center; color: #9ca3af;">뉴스를 불러올 수 없습니다. 나중에 다시 시도해주세요.</p>'
 
     html_content = f'''<!DOCTYPE html>
 <html lang="ko">
@@ -171,6 +171,9 @@ def generate_html(news_items):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 동향 뉴스 리포트 - {formatted_date}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {{
             margin: 0;
@@ -178,119 +181,340 @@ def generate_html(news_items):
             box-sizing: border-box;
         }}
 
+        :root {{
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --light-bg: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+        }}
+
+        html {{
+            scroll-behavior: smooth;
+        }}
+
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             padding: 20px;
             min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
         }}
 
         .container {{
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
             overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: slideIn 0.6s ease-out;
+        }}
+
+        @keyframes slideIn {{
+            from {{
+                opacity: 0;
+                transform: translateY(20px);
+            }}
+            to {{
+                opacity: 1;
+                transform: translateY(0);
+            }}
         }}
 
         .header {{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary);
             color: white;
-            padding: 40px 30px;
+            padding: 50px 40px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }}
 
-        .header h1 {{
-            font-size: 28px;
-            margin-bottom: 10px;
+        .header::before {{
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: drift 20s linear infinite;
+        }}
+
+        @keyframes drift {{
+            0% {{
+                transform: translate(0, 0);
+            }}
+            100% {{
+                transform: translate(50px, 50px);
+            }}
+        }}
+
+        .header-content {{
+            position: relative;
+            z-index: 1;
+        }}
+
+        .header-title {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 36px;
             font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
         }}
 
-        .header p {{
-            font-size: 16px;
+        .header-date {{
+            font-size: 18px;
             opacity: 0.95;
+            font-weight: 400;
+            letter-spacing: 0.5px;
         }}
 
         .content {{
-            padding: 40px 30px;
+            padding: 45px 40px;
         }}
 
         .news-item {{
-            margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid #e5e7eb;
-            transition: transform 0.2s ease;
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .news-item::before {{
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary);
+            transform: scaleY(0);
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }}
+
+        .news-item:hover {{
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.2);
+        }}
+
+        .news-item:hover::before {{
+            transform: scaleY(1);
         }}
 
         .news-item:last-child {{
-            border-bottom: none;
             margin-bottom: 0;
-            padding-bottom: 0;
+        }}
+
+        .news-number {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }}
+
+        .news-content {{
+            flex: 1;
         }}
 
         .news-item h3 {{
-            font-size: 18px;
-            color: #1f2937;
+            font-size: 20px;
+            color: var(--text-primary);
             margin-bottom: 12px;
-            line-height: 1.5;
+            line-height: 1.6;
             font-weight: 600;
         }}
 
-        .news-item .source {{
-            font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 10px;
-            display: inline-block;
-            background: #f3f4f6;
-            padding: 4px 12px;
-            border-radius: 20px;
+        .news-meta {{
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
         }}
 
-        .news-item .link {{
-            margin-top: 12px;
+        .source {{
+            font-size: 13px;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }}
 
         .news-item a {{
+            display: inline-block;
             color: #667eea;
             text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s ease;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 8px 16px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.2);
         }}
 
         .news-item a:hover {{
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateX(4px);
             color: #764ba2;
-            text-decoration: underline;
+        }}
+
+        .empty-state {{
+            text-align: center;
+            padding: 60px 30px;
+            color: var(--text-secondary);
+        }}
+
+        .empty-state p {{
+            font-size: 16px;
         }}
 
         .footer {{
-            background: #f9fafb;
-            padding: 20px 30px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            padding: 30px 40px;
             text-align: center;
             font-size: 14px;
-            color: #6b7280;
-            border-top: 1px solid #e5e7eb;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
         }}
 
-        @media (max-width: 640px) {{
-            body {{
-                padding: 10px;
+        .footer-info {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }}
+
+        .stats {{
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }}
+
+        @media (max-width: 768px) {{
+            .container {{
+                border-radius: 16px;
             }}
 
             .header {{
-                padding: 30px 20px;
+                padding: 36px 24px;
             }}
 
-            .header h1 {{
-                font-size: 24px;
+            .header-title {{
+                font-size: 28px;
+                gap: 8px;
+            }}
+
+            .header-date {{
+                font-size: 16px;
             }}
 
             .content {{
+                padding: 28px 24px;
+            }}
+
+            .news-item {{
                 padding: 20px;
+                margin-bottom: 24px;
+                flex-direction: column;
+                gap: 12px;
+            }}
+
+            .news-item h3 {{
+                font-size: 18px;
+            }}
+
+            .footer {{
+                flex-direction: column;
+                text-align: center;
+                padding: 24px;
+            }}
+
+            .stats {{
+                flex-direction: column;
+                gap: 12px;
+                justify-content: center;
+            }}
+        }}
+
+        @media (max-width: 480px) {{
+            body {{
+                padding: 12px;
+            }}
+
+            .header {{
+                padding: 28px 16px;
+            }}
+
+            .header-title {{
+                font-size: 24px;
+                gap: 6px;
+            }}
+
+            .content {{
+                padding: 20px 16px;
+            }}
+
+            .news-item {{
+                padding: 16px;
+                margin-bottom: 20px;
+            }}
+
+            .news-number {{
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
             }}
 
             .news-item h3 {{
                 font-size: 16px;
+            }}
+
+            .news-item a {{
+                font-size: 12px;
+                padding: 6px 12px;
+            }}
+        }}
+
+        /* 접근성 */
+        @media (prefers-reduced-motion: reduce) {{
+            * {{
+                animation: none !important;
+                transition: none !important;
             }}
         }}
     </style>
@@ -298,18 +522,39 @@ def generate_html(news_items):
 <body>
     <div class="container">
         <div class="header">
-            <h1>🤖 AI 동향 뉴스 리포트</h1>
-            <p>{formatted_date}</p>
+            <div class="header-content">
+                <div class="header-title">
+                    <span>🤖</span>
+                    <span>AI 뉴스 리포트</span>
+                </div>
+                <div class="header-date">{formatted_date}</div>
+            </div>
         </div>
 
         <div class="content">
-            {news_html}
+            {f'<div class="empty-state"><p>📭 뉴스를 불러올 수 없습니다.<br/>나중에 다시 시도해주세요.</p></div>' if not news_html.strip() else '<div class="news-list">' + news_html + '</div>'}
         </div>
 
         <div class="footer">
-            <p>매일 아침 8시 (JST)에 자동으로 생성됩니다 | 최신 AI 뉴스로 업데이트를 유지하세요</p>
+            <div class="footer-info">
+                <span>⏰ 매일 8시 (JST) 자동 생성</span>
+            </div>
+            <div class="stats">
+                <span>📰 총 {len(news_items)}개 기사</span>
+                <span>🔄 최신 업데이트</span>
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {{
+            const items = document.querySelectorAll('.news-item');
+            items.forEach((item, index) => {{
+                item.style.animationDelay = (index * 0.1) + 's';
+                item.style.animation = 'slideIn 0.6s ease-out forwards';
+            }});
+        }});
+    </script>
 </body>
 </html>'''
 
