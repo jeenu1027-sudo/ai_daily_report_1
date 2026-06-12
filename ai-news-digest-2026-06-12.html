@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 동향 뉴스 리포트 - 2026년 06월 12일</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --light-bg: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 20px;
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: drift 20s linear infinite;
+        }
+
+        @keyframes drift {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .header-date {
+            font-size: 18px;
+            opacity: 0.95;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .content {
+            padding: 45px 40px;
+        }
+
+        .news-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary);
+            transform: scaleY(0);
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }
+
+        .news-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+
+        .news-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .news-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .news-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .news-content {
+            flex: 1;
+        }
+
+        .news-category {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .news-item h3 {
+            font-size: 20px;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            line-height: 1.6;
+            font-weight: 600;
+        }
+
+        .news-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .source {
+            font-size: 13px;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .news-item a {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 8px 16px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .news-item a:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateX(4px);
+            color: #764ba2;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 30px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            padding: 30px 40px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 16px;
+            }
+
+            .header {
+                padding: 36px 24px;
+            }
+
+            .header-title {
+                font-size: 28px;
+                gap: 8px;
+            }
+
+            .header-date {
+                font-size: 16px;
+            }
+
+            .content {
+                padding: 28px 24px;
+            }
+
+            .news-item {
+                padding: 20px;
+                margin-bottom: 24px;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .news-item h3 {
+                font-size: 18px;
+            }
+
+            .footer {
+                flex-direction: column;
+                text-align: center;
+                padding: 24px;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 12px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            .header {
+                padding: 28px 16px;
+            }
+
+            .header-title {
+                font-size: 24px;
+                gap: 6px;
+            }
+
+            .content {
+                padding: 20px 16px;
+            }
+
+            .news-item {
+                padding: 16px;
+                margin-bottom: 20px;
+            }
+
+            .news-number {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .news-item h3 {
+                font-size: 16px;
+            }
+
+            .news-item a {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+
+        /* 접근성 */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <span>🤖</span>
+                    <span>AI 뉴스 리포트</span>
+                </div>
+                <div class="header-date">2026년 06월 12일</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="news-list">
+      <div class="news-item">
+        <div class="news-number">1</div>
+        <div class="news-content">
+          <div class="news-category">데이터</div>
+          <h3>제조 AI의 난제 ‘오염 데이터’ 넘었다…아이벡스, ICML서 산업용 AI 원천기술 인정</h3>
+          <div class="news-meta">
+            <span class="source">🇰🇷 VentureSquare</span>
+          </div>
+          <a href="https://www.venturesquare.net/1090956/" target="_blank">기사 보기 →</a>
+        </div>
+      </div>
+    
+      <div class="news-item">
+        <div class="news-number">2</div>
+        <div class="news-content">
+          <div class="news-category">AI 뉴스</div>
+          <h3>“AI 잘 쓰는 사람보다 문제를 정의하는 이가 살아남죠”…김연지 데이븐AI CMO가 말하는 콘텐츠 경쟁력</h3>
+          <div class="news-meta">
+            <span class="source">🇰🇷 VentureSquare</span>
+          </div>
+          <a href="https://www.venturesquare.net/1085384/" target="_blank">기사 보기 →</a>
+        </div>
+      </div>
+    
+      <div class="news-item">
+        <div class="news-number">3</div>
+        <div class="news-content">
+          <div class="news-category">데이터</div>
+          <h3>로봇의 눈과 손, 그리고 데이터…대전서 차세대 로봇 스타트업 격돌</h3>
+          <div class="news-meta">
+            <span class="source">🇰🇷 VentureSquare</span>
+          </div>
+          <a href="https://www.venturesquare.net/1090921/" target="_blank">기사 보기 →</a>
+        </div>
+      </div>
+    
+      <div class="news-item">
+        <div class="news-number">4</div>
+        <div class="news-content">
+          <div class="news-category">대형언어모델</div>
+          <h3>LLM과 데이터베이스를 연결하는 MCP 서버 10종 총정리</h3>
+          <div class="news-meta">
+            <span class="source">🇰🇷 IT World Korea</span>
+          </div>
+          <a href="https://www.itworld.co.kr/article/4184249/%ec%9e%90%ec%97%b0%ec%96%b4%eb%a1%9c-%eb%8d%b0%ec%9d%b4%ed%84%b0%eb%b2%a0%ec%9d%b4%ec%8a%a4%eb%a5%bc-%ec%a1%b0%ec%9e%91%ed%95%98%eb%8a%94-%ec%8b%9c%eb%8c%80-mcp-%ec%84%9c%eb%b2%84%ea%b0%80-%ec%97%b4.html" target="_blank">기사 보기 →</a>
+        </div>
+      </div>
+    
+      <div class="news-item">
+        <div class="news-number">5</div>
+        <div class="news-content">
+          <div class="news-category">모델 학습</div>
+          <h3>내 사진·음성이 AI 학습 데이터로? 구글 기본 설정 지금 바꿔야</h3>
+          <div class="news-meta">
+            <span class="source">🇰🇷 IT World Korea</span>
+          </div>
+          <a href="https://www.itworld.co.kr/article/4184244/%eb%82%b4-%ec%82%ac%ec%a7%84%c2%b7%ec%9d%8c%ec%84%b1%ec%9d%b4-ai-%ed%95%99%ec%8a%b5-%eb%8d%b0%ec%9d%b4%ed%84%b0%eb%a1%9c-%ea%b5%ac%ea%b8%80-%ea%b8%b0%eb%b3%b8-%ec%84%a4%ec%a0%95-%ec%a7%80%ea%b8%88.html" target="_blank">기사 보기 →</a>
+        </div>
+      </div>
+    
+      <div class="news-item">
+        <div class="news-number">6</div>
+        <div class="news-content">
+          <div class="news-category">AI 뉴스</div>
+          <h3>사이클 시간 최대 40% 단축…데브옵스 AI 도구의 실제 효과</h3>
+          <div class="news-meta">
+            <span class="source">🇰🇷 IT World Korea</span>
+          </div>
+          <a href="https://www.itworld.co.kr/article/4183887/%ec%82%ac%ec%9d%b4%ed%81%b4-%ec%8b%9c%ea%b0%84-%ec%b5%9c%eb%8c%80-40-%eb%8b%a8%ec%b6%95%eb%8d%b0%eb%b8%8c%ec%98%b5%ec%8a%a4-ai-%eb%8f%84%ea%b5%ac%ec%9d%98-%ec%8b%a4%ec%a0%9c-%ed%9a%a8.html" target="_blank">기사 보기 →</a>
+        </div>
+      </div>
+    
+      <div class="news-item">
+        <div class="news-number">7</div>
+        <div class="news-content">
+          <div class="news-category">데이터</div>
+          <h3>‘물 먹는 하마’ 데이터센터, 미국 건설 예정지 2/3가 ‘가뭄 고통’</h3>
+          <div class="news-meta">
+            <span class="source">🇰🇷 The Hankyoreh</span>
+          </div>
+          <a href="https://www.hani.co.kr/arti/science/science_general/1262831.html" target="_blank">기사 보기 →</a>
+        </div>
+      </div>
+    
+      <div class="news-item">
+        <div class="news-number">8</div>
+        <div class="news-content">
+          <div class="news-category">AI 뉴스</div>
+          <h3>우리는 왜 인공지능에 성별을 부여하려 할까</h3>
+          <div class="news-meta">
+            <span class="source">🇰🇷 The Hankyoreh</span>
+          </div>
+          <a href="https://www.hani.co.kr/arti/science/future/1262068.html" target="_blank">기사 보기 →</a>
+        </div>
+      </div>
+    </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-info">
+                <span>⏰ 매일 8시 (JST) 자동 생성</span>
+            </div>
+            <div class="stats">
+                <span>📰 총 8개 기사</span>
+                <span>🔄 최신 업데이트</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const items = document.querySelectorAll('.news-item');
+            items.forEach((item, index) => {
+                item.style.animationDelay = (index * 0.1) + 's';
+                item.style.animation = 'slideIn 0.6s ease-out forwards';
+            });
+        });
+    </script>
+</body>
+</html>
