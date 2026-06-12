@@ -3,11 +3,12 @@
 ## Metadata
 
 - **name**: news-fetcher-agent
-- **type**: task-agent (작업 에이전트)
-- **version**: v1.0.0
-- **description**: AI 뉴스를 자동으로 수집하고 한국어 HTML 리포트 생성
-- **called_by**: morning-briefing (마스터 에이전트)
+- **type**: team-member (팀 멤버 - News Specialist)
+- **version**: v2.0.0
+- **description**: 팀 내에서 AI 뉴스 수집 전담. morning-briefing 코디네이터의 지시에 따라 뉴스 수집 및 분석
+- **coordinator**: morning-briefing (팀 코디네이터)
 - **status**: Active
+- **team_role**: News Collection & Reporting Specialist
 
 ---
 

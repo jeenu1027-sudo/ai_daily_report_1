@@ -3,11 +3,12 @@
 ## Metadata
 
 - **name**: morning-briefing
-- **type**: master-agent (조정 에이전트)
-- **version**: v1.0.0
-- **description**: 매일 아침 뉴스 수집 및 GitHub 이슈 분석을 자동 실행하는 마스터 에이전트
+- **type**: coordinator-agent (팀 코디네이터)
+- **version**: v2.0.0
+- **description**: 팀 에이전트를 조정하여 AI 뉴스 수집 및 분석을 관리하는 코디네이터 에이전트
 - **schedule**: `0 8 * * *` (매일 08:00 JST)
 - **status**: Active
+- **multiagent_enabled**: true (팀 멤버: news-fetcher-agent, issue-analyzer)
 
 ---
 
@@ -17,11 +18,12 @@
 
 매일 정해진 시간(8시 JST)에 자동으로 실행되어, 하위 에이전트들을 순차적으로 호출하고 전체 워크플로우를 조정합니다.
 
-**역할**:
-- 하위 에이전트 호출 (`news-fetcher-agent`, `issue-analyzer`)
-- 실행 결과 모니터링
-- 오류 처리 및 복구
-- 최종 보고서 생성
+**역할 (팀 코디네이터)**:
+- **news-fetcher-agent**: 팀 멤버로 위임 (뉴스 수집)
+- **issue-analyzer**: 팀 멤버로 위임 (이슈 분석)
+- 각 팀 멤버의 작업 조정 및 모니터링
+- 팀 멤버 간 데이터 공유 및 협력
+- 최종 보고서 및 권장사항 생성
 
 ---
 
@@ -76,6 +78,40 @@
 
 ---
 
+## 🤝 팀 협력 방식 (Team Coordination)
+
+### Coordinator의 책임
+
+```
+1️⃣ 팀 멤버 역할 정의
+   ├─ news-fetcher-agent: "최신 AI 뉴스 5-8개 수집해줄래?"
+   └─ issue-analyzer: "수집된 뉴스와 관련해서 이슈 분석해줄래?"
+
+2️⃣ 작업 지시 (Task Delegation)
+   ├─ 명확한 지시: "한국어 뉴스만 수집" → news-fetcher-agent
+   └─ 컨텍스트 제공: "뉴스 결과를 고려하면서" → issue-analyzer
+
+3️⃣ 결과 수집 (Results Collection)
+   ├─ news-fetcher-agent 결과: HTML 리포트 + 뉴스 요약
+   └─ issue-analyzer 결과: 우선순위 보고서 + 분석
+
+4️⃣ 데이터 통합 (Data Integration)
+   ├─ "뉴스에서 언급된 주제와 이슈 연관성 분석"
+   ├─ "팀 멤버들의 의견을 종합한 최종 권장사항 제시"
+   └─ "내일 우선 처리할 항목 정리"
+
+5️⃣ 최종 브리핑 (Final Briefing)
+   └─ "이런 뉴스가 나왔고, 이런 이슈가 있습니다. 따라서..."
+```
+
+### 팀 멤버 간 의사소통
+
+- **news-fetcher-agent → morning-briefing**: "수집 완료. 주요 주제는 AI 윤리, LLM 성능입니다."
+- **morning-briefing → issue-analyzer**: "뉴스에서 본 주제: AI 윤리, LLM 성능. 이와 관련된 이슈 우선순위를 높여줄래?"
+- **issue-analyzer → morning-briefing**: "분석 완료. 보안 관련 이슈 3개를 최우선으로 올렸습니다."
+
+---
+
 ## 🎮 실행 방식
 
 ### 자동 실행 (권장)
@@ -94,12 +130,30 @@ claude /agents morning-briefing
 
 ---
 
-## 📊 호출하는 하위 에이전트
+## 👥 팀 구성 (Multiagent Configuration)
 
-| # | 에이전트 | 설명 | 담당 역할 | 예상 시간 |
-|---|---------|------|---------|---------|
-| 1️⃣ | `news-fetcher-agent` | 뉴스 수집 에이전트 | AI 뉴스 검색, 필터링, HTML 생성 | ~5분 |
-| 2️⃣ | `issue-analyzer` | 이슈 분석 에이전트 | GitHub 이슈 자동 분석, 우선순위 설정 | ~3분 |
+```yaml
+multiagent:
+  type: coordinator
+  agents:
+    - name: news-fetcher-agent
+      role: "News Collection Specialist"
+      description: "AI 뉴스 수집 및 한국어 리포트 생성"
+      
+    - name: issue-analyzer
+      role: "Issue Analysis Specialist"
+      description: "GitHub 이슈 분석 및 우선순위 결정"
+      
+    - name: morning-briefing (self)
+      role: "Team Coordinator"
+      description: "팀 멤버 조정, 데이터 통합, 최종 보고"
+```
+
+| # | 팀 멤버 | 역할 | 책임 | 예상 시간 |
+|---|--------|------|------|---------|
+| 1️⃣ | news-fetcher-agent | News Specialist | AI 뉴스 검색, 필터링, HTML 생성 | ~5분 |
+| 2️⃣ | issue-analyzer | Analysis Specialist | GitHub 이슈 분석, 우선순위 평가 | ~3분 |
+| 🎯 | morning-briefing | Coordinator | 팀 조정, 데이터 통합, 최종 브리핑 | ~2분 |
 
 ---
 

@@ -23,7 +23,71 @@ Claude Code 설정 및 커스텀 스킬 정의
 
 ## 📚 사용 가능한 스킬
 
-### 1. `briefing-improver` - 통합 이슈 관리 워크플로우 ⭐ 추천
+### Harness 아키텍처 - 팀 에이전트 스킬
+
+#### 4️⃣ `news-filtering` - AI 뉴스 필터링
+
+최신 AI 뉴스를 **6가지 엄격한 필터링 규칙**에 따라 검증하고 품질 평가합니다.
+
+**필터링 규칙**:
+- 한국어 뉴스만 선별
+- AI 생성 콘텐츠 제외
+- GitHub 자료 제외
+- 국내 대형 포털 제외
+- 학술 논문 제외
+- 웹 출처 제한 (최대 10개)
+
+**품질 점수**: 기사를 0-100으로 평가 (신뢰도, 시간성, 기술 정확도 고려)
+
+자세한 정보: [news-filtering.md](./.claude/skills/news-filtering.md)
+
+---
+
+#### 5️⃣ `issue-priority` - GitHub 이슈 우선순위 평가
+
+GitHub 이슈를 점수 기반 알고리즘으로 평가하여 우선순위를 자동 결정합니다.
+
+**점수 계산식**:
+```
+점수 = (영향도 × 0.5) + (긴급성 × 0.3) - (복잡도 × 0.2) + (뉴스 관련성 × 0.1)
+```
+
+**4개 평가 항목**:
+- 영향도 (Impact): 50% 가중치
+- 긴급성 (Urgency): 30% 가중치
+- 복잡도 (Complexity): 감점 20%
+- 뉴스 관련성 (News Relevance): 보너스 10%
+
+자세한 정보: [issue-priority.md](./.claude/skills/issue-priority.md)
+
+---
+
+#### 6️⃣ `report-generator` - 아침 브리핑 리포트 생성
+
+**뉴스** + **이슈 분석** 결과를 통합하여 시각화된 **HTML 리포트**를 생성합니다.
+
+**리포트 구성**:
+1. Executive Summary (요약)
+2. News Deep Dive (뉴스 상세)
+3. Issue Analysis (이슈 분석)
+4. Recommendations (권장사항)
+
+**특징**:
+- 한국어 완전 지원
+- CSS3 Glassmorphism 디자인
+- 모바일 반응형
+- 다크모드 지원
+- 인쇄 최적화
+
+**출력**: `ai-news-digest-YYYY-MM-DD.html`
+
+자세한 정보: [report-generator.md](./.claude/skills/report-generator.md)
+
+---
+
+### Legacy 스킬
+
+#### 1. `briefing-improver` - 통합 이슈 관리 워크플로우 ⭐ 추천
 
 GitHub 이슈의 생성부터 구현까지 전체 라이프사이클을 자동화합니다.
 
@@ -49,7 +113,7 @@ Claude: briefing-improver (action=complete) 실행
 
 ---
 
-### 2. `issue-writer` - GitHub 이슈 생성
+#### 2. `issue-writer` - GitHub 이슈 생성
 
 이슈만 빠르게 생성합니다.
 
@@ -63,7 +127,7 @@ Claude: issue-writer 스킬 실행 → GitHub 이슈 생성
 
 ---
 
-### 3. `issue-runner` - GitHub 이슈 분석 및 수정
+#### 3. `issue-runner` - GitHub 이슈 분석 및 수정
 
 이슈를 분석하고 코드를 수정합니다.
 

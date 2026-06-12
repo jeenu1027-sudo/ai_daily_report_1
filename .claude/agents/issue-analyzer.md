@@ -3,11 +3,12 @@
 ## Metadata
 
 - **name**: issue-analyzer
-- **type**: task-agent (작업 에이전트)
-- **version**: v1.0.0
-- **description**: GitHub 이슈를 자동으로 분석하고 우선순위 결정
-- **called_by**: morning-briefing (마스터 에이전트)
+- **type**: team-member (팀 멤버 - Analysis Specialist)
+- **version**: v2.0.0
+- **description**: 팀 내에서 GitHub 이슈 분석 전담. morning-briefing 코디네이터의 지시에 따라 이슈 분석 및 우선순위 결정
+- **coordinator**: morning-briefing (팀 코디네이터)
 - **status**: Active
+- **team_role**: Issue Analysis & Priority Specialist
 
 ---
 

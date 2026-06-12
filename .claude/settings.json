@@ -8,6 +8,53 @@
   },
   "agents": {
     "auto_run": true,
-    "log_level": "info"
-  }
+    "log_level": "info",
+    "multiagent": {
+      "enabled": true,
+      "coordinator": "morning-briefing",
+      "team_members": [
+        {
+          "name": "news-fetcher-agent",
+          "role": "News Collection Specialist",
+          "description": "AI 뉴스 수집 및 분석"
+        },
+        {
+          "name": "issue-analyzer",
+          "role": "Issue Analysis Specialist",
+          "description": "GitHub 이슈 분석 및 우선순위"
+        }
+      ],
+      "communication": {
+        "strategy": "sequential",
+        "sync_results": true,
+        "context_sharing": true
+      }
+    }
+  },
+  "skills": [
+    {
+      "name": "news-filtering",
+      "path": "./.claude/skills/news-filtering.md",
+      "version": "1.0.0",
+      "description": "AI 뉴스 필터링 및 품질 평가 로직",
+      "category": "News Processing",
+      "auto_load": true
+    },
+    {
+      "name": "issue-priority",
+      "path": "./.claude/skills/issue-priority.md",
+      "version": "1.0.0",
+      "description": "GitHub 이슈 우선순위 평가 및 스코링 알고리즘",
+      "category": "Issue Management",
+      "auto_load": true
+    },
+    {
+      "name": "report-generator",
+      "path": "./.claude/skills/report-generator.md",
+      "version": "1.0.0",
+      "description": "아침 브리핑 최종 리포트 생성 (HTML + Markdown)",
+      "category": "Report Generation",
+      "auto_load": true
+    }
+  ]
 }
