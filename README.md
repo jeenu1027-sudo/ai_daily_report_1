@@ -4,42 +4,46 @@
 
 ## 🎯 기능
 
-- ✅ Hacker News, Bloomberg, Wired 등 신뢰할 수 있는 소스에서 뉴스 수집
-- ✅ AI 관련 뉴스만 필터링
-- ✅ 일일 자동 실행 (8시 JST)
-- ✅ 반응형 디자인의 아름다운 HTML 리포트
-- ✅ 중복 제거 및 최대 10개 뉴스 표시
+- ✅ **다중 소스**: Hacker News, Bloomberg, The Verge, Ars Technica에서 뉴스 수집
+- ✅ **스마트 필터**: AI 관련 뉴스만 자동 필터링
+- ✅ **자동화**: 매일 8시(JST)에 자동 실행
+- ✅ **깔끔한 리포트**: 반응형 HTML 디자인
+- ✅ **최적화**: 중복 제거 및 최대 10개 뉴스 표시
+
+> **프로젝트 철학**: [SOUL.md](SOUL.md) 참고
 
 ## 📦 설치
 
 ```bash
-# 프로젝트 디렉토리로 이동
-cd C:\ai_daily_report_1
-
 # 의존성 설치
-npm install
+pip install -r requirements.txt
 ```
 
 ## 🚀 사용 방법
 
 ### 수동 실행
 ```bash
-npm run fetch
+python news_fetcher.py
 ```
 
-### 자동 스케줄 실행
-매일 8시(JST)에 자동으로 실행되도록 설정되어 있습니다.
-스케줄 관리는 Claude Code `schedule` 스킬로 수행됩니다.
+**출력**: `ai-news-digest-YYYY-MM-DD.html` 파일 생성
+
+### 자동 스케줄
+매일 8시(JST)에 자동으로 실행됩니다.  
+자세한 설정은 [SCHEDULE_SETUP.md](SCHEDULE_SETUP.md) 참고
 
 ## 📁 파일 구조
 
 ```
 ai_daily_report_1/
-├── news-fetcher.js       # 뉴스 수집 및 HTML 생성 메인 스크립트
-├── package.json          # Node.js 프로젝트 설정
-├── README.md             # 이 파일
-├── schedule-info.md      # 스케줄 설정 정보
-└── ai-news-digest-*.html # 생성된 일일 리포트 (자동 생성)
+├── .claude/
+│   └── skills/               # Claude Code 커스텀 스킬
+├── news_fetcher.py           # 뉴스 수집 및 HTML 생성
+├── requirements.txt          # Python 의존성
+├── README.md                 # 이 파일
+├── SOUL.md                   # 프로젝트 철학
+├── CLAUDE.md                 # Claude Code 설정
+└── ai-news-digest-*.html     # 생성된 일일 리포트
 ```
 
 ## 📊 생성되는 파일
@@ -69,27 +73,44 @@ ai_daily_report_1/
 ## ⚙️ 커스터마이징
 
 ### AI 키워드 추가
-`news-fetcher.js`의 `AI_KEYWORDS` 배열을 수정:
-```javascript
-const AI_KEYWORDS = ['AI', 'artificial intelligence', ..., '새로운키워드'];
+`news_fetcher.py`의 `AI_KEYWORDS` 리스트를 수정:
+```python
+AI_KEYWORDS = [
+    'AI', 'machine learning', 'deep learning', ..., '새로운키워드'
+]
 ```
 
 ### 뉴스 소스 추가
-`fetchAINews()` 함수에 새로운 RSS 피드 추가:
-```javascript
-const sources = [
-  { url: 'https://your-rss-feed-url', name: 'Source Name' },
-];
+`fetch_ai_news()` 함수의 `sources` 리스트에 새 피드 추가:
+```python
+sources = [
+    {
+        'url': 'https://your-rss-feed-url',
+        'name': 'Source Name'
+    },
+]
 ```
 
 ### HTML 스타일 변경
-`generateHTML()` 함수의 `<style>` 섹션을 수정하여 색상, 폰트, 레이아웃을 변경할 수 있습니다.
+`generate_html()` 함수의 CSS 섹션 수정으로 색상, 폰트, 레이아웃 변경 가능
 
 ## 🐛 문제 해결
 
-- **모듈 찾을 수 없음 오류**: `npm install` 을 다시 실행하세요
-- **뉴스가 수집되지 않음**: 인터넷 연결을 확인하고, 뉴스 소스 URL이 정상인지 확인하세요
-- **파일이 생성되지 않음**: 디렉토리 쓰기 권한을 확인하세요
+| 문제 | 해결 방법 |
+|------|---------|
+| 모듈 없음 오류 | `pip install -r requirements.txt` 실행 |
+| 뉴스 수집 실패 | 인터넷 연결 확인, 뉴스 소스 URL 확인 |
+| 파일 생성 안 됨 | 디렉토리 쓰기 권한 확인 |
+| 스케줄 미실행 | [SCHEDULE_SETUP.md](SCHEDULE_SETUP.md) 참고 |
+
+더 자세한 정보는 [SCHEDULE_SETUP.md](SCHEDULE_SETUP.md)를 참고하세요.
+
+## 📖 문서
+
+- **[SOUL.md](SOUL.md)**: 프로젝트 비전과 철학
+- **[CLAUDE.md](CLAUDE.md)**: Claude Code 설정 및 스킬
+- **[SCHEDULE_SETUP.md](SCHEDULE_SETUP.md)**: Windows Task Scheduler 설정
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)**: 상세 프로젝트 정보
 
 ## 📄 라이선스
 
@@ -97,5 +118,6 @@ const sources = [
 
 ---
 
-**마지막 업데이트**: 2026-06-11  
-**자동 실행**: 매일 오전 8시 (JST)
+**마지막 업데이트**: 2026-06-12  
+**자동 실행**: 매일 오전 8시 (JST)  
+**언어**: Python 3.14.6
