@@ -1,0 +1,13 @@
+{
+  "model": "claude-opus-4-8",
+  "permissions": {
+    "gh": "allow",
+    "bash": "allow",
+    "python": "allow",
+    "git": "allow"
+  },
+  "agents": {
+    "auto_run": true,
+    "log_level": "info"
+  }
+}
