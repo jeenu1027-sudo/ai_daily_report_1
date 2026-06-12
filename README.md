@@ -2,16 +2,14 @@
 
 매일 아침 8시(동경표준시)에 자동으로 AI 관련 최신 뉴스를 수집하여 깔끔한 HTML 형식으로 생성합니다.
 
-## 🎯 기능
+## 🎯 주요 기능
 
 - ✅ **한국어 전용**: VentureSquare, IT World Korea, The Hankyoreh 등에서 한국 AI 뉴스만 수집
 - ✅ **지능형 필터링**: AI 생성 기사, 논문, GitHub 콘텐츠 자동 제외
 - ✅ **초보자 친화적**: AI 초보자도 이해할 수 있는 수준의 기사만 선별
-- ✅ **자동화**: 매일 8시(JST)에 자동 실행
+- ✅ **자동화**: 매일 8시(JST)에 자동 실행 ([SOUL.md](SOUL.md) 철학 기반)
 - ✅ **깔끔한 리포트**: 반응형 HTML 디자인, 현대적 UI
 - ✅ **최적화**: 중복 제거 및 최대 15개 뉴스 표시
-
-> **프로젝트 철학**: [SOUL.md](SOUL.md) 참고
 
 ## 📦 설치
 
@@ -124,10 +122,11 @@ korean_sources = [
 
 ## 📖 문서
 
-- **[SOUL.md](SOUL.md)**: 프로젝트 비전과 철학
-- **[CLAUDE.md](CLAUDE.md)**: Claude Code 설정 및 스킬
-- **[SCHEDULE_SETUP.md](SCHEDULE_SETUP.md)**: Windows Task Scheduler 설정
-- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)**: 상세 프로젝트 정보
+| 문서 | 목적 |
+|------|------|
+| [SOUL.md](SOUL.md) | 프로젝트 비전, 핵심 가치, 설계 원칙 |
+| [CLAUDE.md](CLAUDE.md) | Claude Code 설정, 커스텀 스킬 정의 |
+| [SCHEDULE_SETUP.md](SCHEDULE_SETUP.md) | Windows Task Scheduler 자동 실행 설정 |
 
 ## 📄 라이선스
 

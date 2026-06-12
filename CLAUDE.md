@@ -1,9 +1,8 @@
 # Claude Code Configuration
 
-프로젝트 설정 및 커스텀 스킬 정의
+Claude Code 설정 및 커스텀 스킬 정의
 
-> **프로젝트 정보**: 프로젝트 개요, 설치, 실행은 [README.md](README.md) 참고  
-> **설계 철학**: 프로젝트 비전, 핵심 가치는 [SOUL.md](SOUL.md) 참고
+**관련 문서**: [프로젝트 개요](README.md) • [설계 철학](SOUL.md)
 
 ## ⚙️ Claude Code 설정
 
