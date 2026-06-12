@@ -4,11 +4,12 @@
 
 ## 🎯 기능
 
-- ✅ **다중 소스**: Hacker News, Bloomberg, The Verge, Ars Technica에서 뉴스 수집
-- ✅ **스마트 필터**: AI 관련 뉴스만 자동 필터링
+- ✅ **한국어 전용**: VentureSquare, IT World Korea, The Hankyoreh 등에서 한국 AI 뉴스만 수집
+- ✅ **지능형 필터링**: AI 생성 기사, 논문, GitHub 콘텐츠 자동 제외
+- ✅ **초보자 친화적**: AI 초보자도 이해할 수 있는 수준의 기사만 선별
 - ✅ **자동화**: 매일 8시(JST)에 자동 실행
-- ✅ **깔끔한 리포트**: 반응형 HTML 디자인
-- ✅ **최적화**: 중복 제거 및 최대 10개 뉴스 표시
+- ✅ **깔끔한 리포트**: 반응형 HTML 디자인, 현대적 UI
+- ✅ **최적화**: 중복 제거 및 최대 15개 뉴스 표시
 
 > **프로젝트 철학**: [SOUL.md](SOUL.md) 참고
 
@@ -52,16 +53,23 @@ ai_daily_report_1/
 - 파일은 현재 디렉토리 (C:\ai_daily_report_1\)에 저장됩니다
 - 브라우저에서 열어보면 보기 좋은 리포트를 확인할 수 있습니다
 
-## 🔧 뉴스 소스
+## 🔧 뉴스 소스 (한국 전용)
 
-현재 다음 소스에서 뉴스를 수집합니다:
+현재 다음 한국 매체에서 AI 뉴스를 수집합니다:
 
-1. **Hacker News** - 기술 뉴스 커뮤니티
-2. **Bloomberg** - 비즈니스/기술 뉴스
-3. **The Verge** - 기술 뉴스
-4. **Ars Technica** - 기술/과학 뉴스 (안정성 개선)
+| 소스 | 특징 | 우선순위 |
+|------|------|--------|
+| **VentureSquare** | 한국 스타트업 & AI 뉴스 | ⭐⭐⭐ |
+| **IT World Korea** | IT 기술 뉴스 | ⭐⭐ |
+| **The Hankyoreh (Science)** | 과학/기술 뉴스 | ⭐⭐ |
 
-더 많은 소스를 추가하려면 `news_fetcher.py`의 `sources` 배열을 수정하세요.
+**필터링 규칙:**
+- ✅ 한국어 기사만 수집
+- ❌ AI가 생성한 기사 제외
+- ❌ 학술 논문/백서 제외
+- ❌ GitHub 저장소 및 코드 관련 콘텐츠 제외
+
+더 많은 소스를 추가하려면 `news_fetcher.py`의 `fetch_korean_news_sources()` 함수를 수정하세요.
 
 ## 📝 로그
 
@@ -73,20 +81,29 @@ ai_daily_report_1/
 ## ⚙️ 커스터마이징
 
 ### AI 키워드 추가
-`news_fetcher.py`의 `AI_KEYWORDS` 리스트를 수정:
+`news_fetcher.py`의 `AI_KEYWORDS` 리스트를 수정 (한글 권장):
 ```python
 AI_KEYWORDS = [
-    'AI', 'machine learning', 'deep learning', ..., '새로운키워드'
+    'AI', '인공지능', '머신러닝', '딥러닝', ..., '새로운키워드'
 ]
 ```
 
-### 뉴스 소스 추가
-`fetch_ai_news()` 함수의 `sources` 리스트에 새 피드 추가:
+### 필터링 규칙 변경
+필터링 키워드 리스트 수정:
 ```python
-sources = [
+AI_GENERATED_KEYWORDS = [...]  # AI 생성 기사 감지
+ACADEMIC_KEYWORDS = [...]      # 논문 감지
+GITHUB_KEYWORDS = [...]        # GitHub 콘텐츠 감지
+```
+
+### 뉴스 소스 추가
+`fetch_korean_news_sources()` 함수의 `korean_sources` 리스트에 새 피드 추가:
+```python
+korean_sources = [
     {
         'url': 'https://your-rss-feed-url',
-        'name': 'Source Name'
+        'name': '🇰🇷 Source Name',
+        'priority': 2
     },
 ]
 ```
