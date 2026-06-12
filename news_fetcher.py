@@ -17,28 +17,52 @@ from pathlib import Path
 
 OUTPUT_DIR = Path(__file__).parent
 
-# AI 뉴스 관련 키워드
+# AI 뉴스 관련 키워드 (한글)
 AI_KEYWORDS = [
-    'AI', 'artificial intelligence', 'machine learning', 'deep learning',
-    'neural', 'LLM', 'GPT', 'Claude', 'model', 'training', 'algorithm',
-    'transformer', 'neural network', 'data science', 'automation'
+    'AI', '인공지능', '머신러닝', '딥러닝',
+    '신경망', 'LLM', 'GPT', 'Claude', '모델', '학습', '알고리즘',
+    '트랜스포머', '언어모델', '데이터', '자동화', '챗봇',
+    '생성형', '이미지생성', '음성인식', '자연어'
 ]
 
-# 카테고리 매핑 (영어 → 한글)
+# 카테고리 매핑
 CATEGORY_MAPPING = {
     'gpt': '생성형 AI',
+    'chatgpt': '생성형 AI',
     'claude': '생성형 AI',
     'llm': '대형언어모델',
-    'machine learning': '머신러닝',
-    'deep learning': '딥러닝',
-    'neural': '신경망',
-    'transformer': '트랜스포머',
-    'training': '모델 학습',
-    'algorithm': '알고리즘',
-    'data science': '데이터 과학',
-    'automation': '자동화',
-    'model': 'AI 모델'
+    '머신러닝': '머신러닝',
+    '딥러닝': '딥러닝',
+    '신경망': '신경망',
+    '트랜스포머': '트랜스포머',
+    '학습': '모델 학습',
+    '알고리즘': '알고리즘',
+    '데이터': '데이터',
+    '자동화': '자동화',
+    '생성형': '생성형 AI',
+    '이미지': '이미지생성',
+    '음성': '음성인식'
 }
+
+# AI 생성 기사 감지 키워드
+AI_GENERATED_KEYWORDS = [
+    'AI가 작성', 'AI가 쓴', 'AI 생성', 'ChatGPT가 작성',
+    'Claude가 작성', 'GPT가 생성', '인공지능 생성', '자동 생성',
+    'AI 기사', 'AI 뉴스', '생성형 AI가', 'AI로 만든'
+]
+
+# 논문/학술자료 감지 키워드
+ACADEMIC_KEYWORDS = [
+    '논문', 'arXiv', 'PDF', '연구', '학술', '페이퍼',
+    '백서', '리서치', '저널', '저자', '인용'
+]
+
+# GitHub 콘텐츠 감지 키워드
+GITHUB_KEYWORDS = [
+    'github', 'repository', '저장소', '코드', 'commit',
+    'pull request', 'issue', '오픈소스', 'open source',
+    'github.com', 'repo', 'fork', 'star'
+]
 
 def get_category(title):
     """뉴스 제목 기반 한글 카테고리 생성"""
@@ -53,35 +77,61 @@ def is_ai_related(title, description=''):
     text = (title + ' ' + description).lower()
     return any(keyword.lower() in text for keyword in AI_KEYWORDS)
 
-def fetch_hacker_news():
-    """Hacker News에서 AI 관련 뉴스 수집"""
-    try:
-        print("📰 Hacker News에서 뉴스를 수집 중...")
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        response = requests.get('https://news.ycombinator.com/', headers=headers, timeout=10)
-        response.encoding = 'utf-8'
+def is_generated_by_ai(title, description=''):
+    """AI가 생성한 기사인지 감지"""
+    text = (title + ' ' + description).lower()
+    return any(keyword.lower() in text for keyword in AI_GENERATED_KEYWORDS)
 
-        soup = BeautifulSoup(response.content, 'html.parser')
-        news = []
+def is_academic_paper(title, description=''):
+    """논문/학술자료인지 감지"""
+    text = (title + ' ' + description).lower()
+    return any(keyword.lower() in text for keyword in ACADEMIC_KEYWORDS)
 
-        for item in soup.find_all('span', class_='titleline')[:30]:
-            link = item.find('a')
-            if link:
-                title = link.get_text()
-                url = link.get('href', '')
+def is_github_content(title, description=''):
+    """GitHub 콘텐츠인지 감지"""
+    text = (title + ' ' + description).lower()
+    return any(keyword.lower() in text for keyword in GITHUB_KEYWORDS)
 
-                if is_ai_related(title):
-                    news.append({
-                        'title': title[:100],
-                        'url': url[:500] if url else '',
-                        'source': 'Hacker News',
-                        'category': get_category(title)
-                    })
+def fetch_korean_news_sources():
+    """한국 AI 뉴스 소스 통합 수집"""
+    korean_sources = [
+        {
+            'url': 'https://www.venturesquare.net/feed',
+            'name': '🇰🇷 VentureSquare',
+            'priority': 3
+        },
+        {
+            'url': 'https://feeds.zdnet.co.kr/zdnet/',
+            'name': '🇰🇷 ZDNet Korea',
+            'priority': 2
+        },
+        {
+            'url': 'https://www.itworld.co.kr/feed/',
+            'name': '🇰🇷 IT World Korea',
+            'priority': 2
+        },
+        {
+            'url': 'https://www.hani.co.kr/rss/science/',
+            'name': '🇰🇷 The Hankyoreh',
+            'priority': 2
+        },
+    ]
 
-        return news[:5]
-    except Exception as e:
-        print(f"❌ Hacker News 수집 실패: {str(e)}")
-        return []
+    all_news = []
+    for source in korean_sources:
+        news = fetch_rss_feed(source['url'], source['name'])
+        # 필터링 적용
+        filtered_news = []
+        for item in news:
+            title = item.get('title', '')
+            if (is_ai_related(title) and
+                not is_generated_by_ai(title) and
+                not is_academic_paper(title) and
+                not is_github_content(title)):
+                filtered_news.append(item)
+        all_news.extend(filtered_news)
+
+    return all_news
 
 def fetch_rss_feed(feed_url, source_name):
     """RSS 피드에서 뉴스 수집"""
@@ -132,143 +182,25 @@ def fetch_rss_feed(feed_url, source_name):
         print(f"❌ {source_name} 수집 실패: {str(e)}")
         return []
 
-def fetch_korean_github_ai():
-    """한국 GitHub AI 프로젝트 트렌딩 수집"""
-    try:
-        print("📰 한국 GitHub AI 프로젝트 수집 중...")
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-
-        # GitHub API: 한국 관련 AI 프로젝트
-        url = 'https://api.github.com/search/repositories'
-        params = {
-            'q': 'language:python stars:>100 topic:ai created:>2026-06-01',
-            'sort': 'stars',
-            'order': 'desc',
-            'per_page': 10
-        }
-
-        response = requests.get(url, params=params, headers=headers, timeout=10)
-        data = response.json()
-
-        news = []
-        if 'items' in data:
-            for item in data['items'][:5]:
-                if is_ai_related(item.get('name', '') + ' ' + item.get('description', '')):
-                    news.append({
-                        'title': f"[{item['name']}] {item.get('description', 'AI 프로젝트')[:80]}",
-                        'url': item['html_url'],
-                        'source': '🇰🇷 GitHub 한국',
-                        'category': 'GitHub 프로젝트'
-                    })
-
-        return news
-    except Exception as e:
-        print(f"❌ GitHub 수집 실패: {str(e)}")
-        return []
-
-def fetch_korean_medium_ai():
-    """한국 Medium AI 관련 글 수집"""
-    try:
-        print("📰 한국 Medium AI 글 수집 중...")
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-
-        # Medium API 대신 RSS 피드 사용
-        sources = [
-            {
-                'url': 'https://medium.com/feed/tag/artificial-intelligence',
-                'name': 'Medium AI'
-            },
-            {
-                'url': 'https://medium.com/feed/tag/machine-learning',
-                'name': 'Medium ML'
-            }
-        ]
-
-        news = []
-        for source in sources:
-            try:
-                response = requests.get(source['url'], headers=headers, timeout=10)
-                response.encoding = 'utf-8'
-                root = ET.fromstring(response.content)
-
-                items = root.findall('.//item') or root.findall('.//{http://www.w3.org/2005/Atom}entry')
-                for item in items[:3]:
-                    title_elem = item.find('title') or item.find('{http://www.w3.org/2005/Atom}title')
-                    link_elem = item.find('link') or item.find('{http://www.w3.org/2005/Atom}link')
-
-                    title = (title_elem.text if title_elem is not None else '')
-                    link = (link_elem.text if link_elem is not None else '')
-
-                    if not link and link_elem is not None:
-                        link = link_elem.get('href', '')
-
-                    if title and is_ai_related(title):
-                        news.append({
-                            'title': title[:100],
-                            'url': link[:500] if link else '',
-                            'source': source['name'],
-                            'category': get_category(title)
-                        })
-            except Exception as e:
-                print(f"❌ {source['name']} 수집 실패: {str(e)}")
-                continue
-
-        return news
-    except Exception as e:
-        print(f"❌ Medium 수집 실패: {str(e)}")
-        return []
 
 def fetch_ai_news():
-    """AI 관련 뉴스 수집 (영어 + 한국 소스)"""
-    all_news = []
+    """한국 AI 뉴스만 수집"""
+    print("📰 한국 AI 뉴스를 수집 중...\n")
 
-    # 1. 영어 뉴스 (Hacker News)
-    hn_news = fetch_hacker_news()
-    all_news.extend(hn_news)
-
-    # 2. 국제 뉴스 (RSS 피드)
-    sources = [
-        {
-            'url': 'https://feeds.bloomberg.com/markets/news.rss',
-            'name': 'Bloomberg'
-        },
-        {
-            'url': 'https://feeds.theverge.com/theverge/index.xml',
-            'name': 'The Verge'
-        },
-        {
-            'url': 'https://feeds.arstechnica.com/arstechnica/index',
-            'name': 'Ars Technica'
-        },
-    ]
-
-    for source in sources:
-        news = fetch_rss_feed(source['url'], source['name'])
-        all_news.extend(news)
-
-    # 3. 한국 소스 추가
-    korean_github = fetch_korean_github_ai()
-    all_news.extend(korean_github)
-
-    korean_medium = fetch_korean_medium_ai()
-    all_news.extend(korean_medium)
+    # 한국 뉴스 소스에서만 수집
+    news_items = fetch_korean_news_sources()
 
     # 중복 제거
     seen = set()
     unique_news = []
 
-    for item in all_news:
+    for item in news_items:
         if item['title'] not in seen:
             seen.add(item['title'])
             unique_news.append(item)
 
-    # 한국 소스 우선순위 높이기 (한국 뉴스를 앞에 배치)
-    korean_news = [item for item in unique_news if '🇰🇷' in item.get('source', '') or 'Medium' in item.get('source', '')]
-    other_news = [item for item in unique_news if '🇰🇷' not in item.get('source', '') and 'Medium' not in item.get('source', '')]
-
-    # 한국 뉴스를 앞에 배치하고 최대 15개 반환
-    prioritized_news = korean_news + other_news
-    return prioritized_news[:15]
+    # 최대 15개 반환
+    return unique_news[:15]
 
 def generate_html(news_items):
     """현대적인 디자인의 HTML 리포트 생성"""
