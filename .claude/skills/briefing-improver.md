@@ -2,12 +2,17 @@
 
 ## Metadata
 - **name**: briefing-improver
-- **description**: GitHub 이슈를 생성하고 분석한 후 실제 코드 수정까지 완료하는 완전 자동화 워크플로우
+- **description**: issue-writer와 issue-runner를 통합 조정하는 마스터 스킬. 사용자 요청을 받으면 이슈 생성부터 코드 수정까지 전체 워크플로우를 자동 실행
 - **version**: 1.0.0
+- **type**: 통합 스킬 (Integration Skill)
 
 ## Summary
 
-이 스킬은 GitHub 이슈 관리의 전체 라이프사이클을 자동화합니다. 사용자가 원하는 기능이나 버그를 설명하면, 이슈를 생성하고, 분석하고, 계획을 수립한 후, 실제로 코드를 수정하고 GitHub에 반영하는 모든 과정을 자동으로 처리합니다.
+이 스킬은 GitHub 이슈 관리의 진입점(트리거)입니다. 사용자가 `briefing-improver`를 호출하면:
+1. **issue-writer** 스킬을 실행하여 이슈 생성
+2. **issue-runner** 스킬을 실행하여 분석 → 계획 → 구현
+
+이 두 스킬의 실행을 자동으로 조정하고 연결합니다. 사용자는 이 하나의 스킬만 호출하면 전체 워크플로우가 자동으로 진행됩니다.
 
 ## Usage
 
@@ -38,124 +43,127 @@
 - **create_pr** (boolean): Pull Request 자동 생성 여부 (기본값: false)
 - **branch_name** (string): 커밋 브랜치명 (기본값: feature/issue-N)
 
-## Workflow
+## 통합 워크플로우 (Integrated Workflow)
 
-### 1️⃣ 이슈 생성 (Issue-Writer)
 ```
-사용자 요청
+사용자: "briefing-improver 호출"
    ↓
-제목/설명 검증
+┌─────────────────────────────────────────────────────────┐
+│           briefing-improver (마스터 스킬)                 │
+└─────────────────────────────────────────────────────────┘
    ↓
-GitHub에 이슈 생성
+┌─────────────────────────────────────────────────────────┐
+│ 1️⃣ issue-writer 실행                                     │
+│   - 이슈 제목/설명 검증                                   │
+│   - GitHub에 이슈 생성                                    │
+│   - 이슈 번호 반환                                        │
+└─────────────────────────────────────────────────────────┘
    ↓
-이슈 URL 반환
-```
-
-### 2️⃣ 이슈 분석 (Issue-Runner Analyze)
-```
-이슈 상세 조회
+┌─────────────────────────────────────────────────────────┐
+│ 2️⃣ issue-runner 실행 (4단계)                             │
+│                                                         │
+│   Step 1: 분석 (Analyze)                                 │
+│   - 이슈 상세 조회                                        │
+│   - 요구사항 파악                                         │
+│   - 영향 범위 식별                                        │
+│                                                         │
+│   Step 2: 계획 (Plan)                                    │
+│   - 근본 원인 분석                                        │
+│   - 해결 방법 도출                                        │
+│   - 구현 계획서 작성                                      │
+│                                                         │
+│   Step 3: 구현 (Implement)                               │
+│   - 필요 파일 수정                                        │
+│   - 코드 작성/변경                                        │
+│   - 테스트 실행                                           │
+│   - 문서 업데이트                                         │
+│                                                         │
+│   Step 4: 완료 (Finalize)                                │
+│   - 커밋 및 푸시                                          │
+│   - PR 생성                                               │
+│   - 이슈 CLOSED                                           │
+└─────────────────────────────────────────────────────────┘
    ↓
-요구사항 파악
-   ↓
-영향 범위 식별
-   ↓
-분석 결과 요약
-```
-
-### 3️⃣ 계획 수립 (Issue-Runner Plan)
-```
-문제 정의
-   ↓
-근본 원인 분석
-   ↓
-해결 방법 도출
-   ↓
-영향받는 파일 식별
-   ↓
-구현 계획서 작성
-```
-
-### 4️⃣ 코드 구현 (Issue-Runner Implement)
-```
-필요 파일 수정
-   ↓
-코드 작성/변경
-   ↓
-테스트 실행
-   ↓
-문서 업데이트
-   ↓
-커밋 및 푸시
-   ↓
-(선택) PR 생성
+✅ 전체 워크플로우 완료
 ```
 
 ## Step-by-Step Instructions
 
-### 신규 기능/버그 보고 (complete 모드)
+### 통합 워크플로우 실행 (briefing-improver 호출)
 
 ```
-1️⃣  사용자: "새 기능을 추가하고 구현해줘"
-     └─ 제목과 설명 제공
+1️⃣  사용자: "/briefing-improver"
+     - 제목과 설명 제공
+     - action 선택 (create-only, analyze-only, plan-only, complete, implement-only)
 
-2️⃣  스킬: issue-writer 실행
+2️⃣  briefing-improver 스킬 시작
+     └─ 마스터 스킬이 전체 워크플로우 조정
+
+3️⃣  issue-writer 호출
      └─ GitHub에 이슈 생성
      └─ 이슈 번호 획득 (예: #5)
 
-3️⃣  스킬: issue-runner analyze 실행
+4️⃣  issue-runner 호출 (action에 따라)
+     
+     🔍 analyze 단계
      └─ Issue #5 상세 분석
      └─ 요구사항 파악
-
-4️⃣  스킬: issue-runner plan 실행
+     
+     📋 plan 단계
      └─ 상세한 구현 계획 수립
      └─ 영향 범위 및 일정 예측
-
-5️⃣  스킬: issue-runner implement 실행
+     
+     💻 implement 단계
      └─ 코드 수정
      └─ 테스트 및 검증
      └─ 문서 업데이트
      └─ 커밋 및 푸시
 
-6️⃣  결과: 
+5️⃣  결과 반환
      └─ GitHub 이슈 CLOSED
      └─ 코드 변경 반영
      └─ (선택) PR 생성
+     └─ 전체 워크플로우 완료
 ```
 
 ## Examples
 
-### 예시 1: 전체 프로세스 (생성 → 구현)
+### 예시 1: 전체 프로세스 (briefing-improver 호출)
 
 **사용자**:
 ```
-"이메일 알림 기능을 추가해줘. 
-매일 뉴스를 이메일로 발송하는 기능이 필요해."
+"/briefing-improver"
+제목: "이메일 알림 기능 추가"
+설명: "매일 뉴스를 이메일로 발송하는 기능이 필요해"
+action: "complete"
 ```
 
-**스킬 실행**:
+**briefing-improver 마스터 스킬 실행**:
 ```
-1. issue-writer
-   → Issue #5 생성: "Add email notification feature"
+┌─ issue-writer 호출
+│  └─ Issue #5 생성: "Add email notification feature"
+│
+├─ issue-runner analyze 호출
+│  └─ 이슈 분석: 이메일 발송, SMTP 연동 필요
+│
+├─ issue-runner plan 호출
+│  └─ 계획 수립: news_mailer.py 생성, 스케줄 통합
+│
+└─ issue-runner implement 호출
+   └─ 코드 구현
+   └─ news_mailer.py 작성
+   └─ setup_schedule.ps1 수정
+   └─ README 업데이트
+   └─ 커밋: Fix #5: Add email notification feature
+   └─ Pull Request 자동 생성
 
-2. issue-runner analyze
-   → 이슈 분석: 이메일 발송, SMTP 연동 필요
-
-3. issue-runner plan
-   → 계획 수립: news_mailer.py 생성, 스케줄 통합
-
-4. issue-runner implement
-   → 코드 구현
-   → news_mailer.py 작성
-   → setup_schedule.ps1 수정
-   → README 업데이트
-   → 커밋: Fix #5: Add email notification feature
-
-5. 결과
+✅ 결과
    → Issue #5 CLOSED
-   → Pull Request 자동 생성
+   → 코드 변경 완료
+   → PR 생성 완료
 ```
 
-**시간 소요**: ~1시간
+**시간 소요**: ~1시간 (briefing-improver 호출만으로 자동 진행)
 
 ---
 
@@ -348,6 +356,20 @@ create → analyze → plan → 검토 → implement
 
 ### Tip 4: 코드 리뷰
 자신의 코드를 다시 한 번 검토
+
+## 관련 스킬
+
+### 통합 스킬 (이 스킬)
+- **briefing-improver** - 마스터 스킬, issue-writer와 issue-runner를 조정
+
+### 하위 스킬 (briefing-improver가 호출)
+- **issue-writer** - 이슈 생성 전담
+- **issue-runner** - 이슈 분석 및 구현 전담
+
+### 사용 시나리오
+- 새로운 기능/버그: `briefing-improver` (action=complete)
+- 빠른 이슈 생성만: `issue-writer` 직접 호출
+- 이슈 분석만: `issue-runner` 직접 호출
 
 ## Links
 
