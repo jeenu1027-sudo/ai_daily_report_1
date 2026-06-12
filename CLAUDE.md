@@ -24,9 +24,34 @@
 
 ## 📚 사용 가능한 스킬
 
-### 1. `issue-writer` - GitHub 이슈 생성
+### 1. `issue-handler` - 통합 이슈 관리 워크플로우 ⭐ 추천
 
-이슈를 빠르게 생성합니다.
+GitHub 이슈의 생성부터 구현까지 전체 라이프사이클을 자동화합니다.
+
+**사용 예**:
+```
+사용자: "새 기능을 추가하고 완전히 구현해줘"
+Claude: issue-handler (action=complete) 실행
+  1. 이슈 생성
+  2. 분석
+  3. 계획 수립
+  4. 코드 구현
+  5. PR 생성
+```
+
+**4가지 모드**:
+- `create-only`: 이슈 생성만
+- `analyze-only`: 분석만
+- `plan-only`: 계획 수립만
+- `complete`: 전체 처리 (완전 자동)
+
+자세한 정보: [issue-handler.md](./.claude/skills/issue-handler.md)
+
+---
+
+### 2. `issue-writer` - GitHub 이슈 생성
+
+이슈만 빠르게 생성합니다.
 
 **사용 예**:
 ```
@@ -36,7 +61,9 @@ Claude: issue-writer 스킬 실행 → GitHub 이슈 생성
 
 자세한 정보: [issue-writer.md](./.claude/skills/issue-writer.md)
 
-### 2. `issue-runner` - GitHub 이슈 분석 및 수정
+---
+
+### 3. `issue-runner` - GitHub 이슈 분석 및 수정
 
 이슈를 분석하고 코드를 수정합니다.
 
