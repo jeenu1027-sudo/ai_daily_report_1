@@ -1,0 +1,171 @@
+{
+  "harness_version": "1.0.0",
+  "description": "Claude Code Harness Hooks - Day 2 Automation",
+  "last_updated": "2026-06-12",
+
+  "before_morning_briefing": {
+    "description": "아침 브리핑 시작 전 실행",
+    "trigger": "morning-briefing 에이전트 시작",
+    "actions": [
+      {
+        "name": "sync_git_repo",
+        "command": "git pull origin main",
+        "retry": 2,
+        "timeout": 30,
+        "on_error": "warn"
+      },
+      {
+        "name": "log_start",
+        "command": "echo '[$(date)] Morning briefing started' >> .claude/logs/daily.log",
+        "timeout": 5,
+        "on_error": "continue"
+      }
+    ]
+  },
+
+  "after_news_fetch": {
+    "description": "뉴스 수집 완료 후 실행",
+    "trigger": "news-fetcher-agent 완료",
+    "actions": [
+      {
+        "name": "stage_news_files",
+        "command": "git add ai-news-digest-*.html",
+        "timeout": 10,
+        "on_error": "warn"
+      },
+      {
+        "name": "commit_news",
+        "command": "git commit -m 'docs: Update daily AI news report'",
+        "timeout": 10,
+        "on_error": "warn"
+      },
+      {
+        "name": "log_news_result",
+        "command": "echo '[$(date)] News fetch completed' >> .claude/logs/daily.log",
+        "timeout": 5,
+        "on_error": "continue"
+      }
+    ]
+  },
+
+  "after_issue_analysis": {
+    "description": "이슈 분석 완료 후 실행",
+    "trigger": "issue-analyzer 에이전트 완료",
+    "actions": [
+      {
+        "name": "stage_reports",
+        "command": "git add issue-priority-report-*.md .claude/logs/issue-analyzer-*.log",
+        "timeout": 10,
+        "on_error": "warn"
+      },
+      {
+        "name": "commit_analysis",
+        "command": "git commit -m 'docs: Update GitHub issue priority report'",
+        "timeout": 10,
+        "on_error": "warn"
+      },
+      {
+        "name": "log_analysis_result",
+        "command": "echo '[$(date)] Issue analysis completed' >> .claude/logs/daily.log",
+        "timeout": 5,
+        "on_error": "continue"
+      }
+    ]
+  },
+
+  "after_morning_briefing": {
+    "description": "아침 브리핑 전체 완료 후 실행",
+    "trigger": "morning-briefing 에이전트 완료",
+    "actions": [
+      {
+        "name": "push_to_github",
+        "command": "git push origin main",
+        "retry": 2,
+        "timeout": 30,
+        "on_error": "warn"
+      },
+      {
+        "name": "log_completion",
+        "command": "echo '[$(date)] Morning briefing completed successfully' >> .claude/logs/daily.log",
+        "timeout": 5,
+        "on_error": "continue"
+      },
+      {
+        "name": "cleanup_old_logs",
+        "command": "find .claude/logs -name '*.log' -mtime +30 -delete",
+        "timeout": 10,
+        "on_error": "continue"
+      }
+    ]
+  },
+
+  "on_error": {
+    "description": "에러 발생 시 실행",
+    "trigger": "any agent fails",
+    "actions": [
+      {
+        "name": "log_error",
+        "command": "echo '[$(date)] ERROR: $(echo $ERROR_MESSAGE)' >> .claude/logs/error.log",
+        "timeout": 5,
+        "on_error": "continue"
+      },
+      {
+        "name": "git_status",
+        "command": "git status >> .claude/logs/error.log 2>&1",
+        "timeout": 10,
+        "on_error": "continue"
+      }
+    ]
+  },
+
+  "daily_maintenance": {
+    "description": "일일 유지보수 작업",
+    "trigger": "매일 23:59",
+    "actions": [
+      {
+        "name": "archive_logs",
+        "command": "mv .claude/logs/daily.log .claude/logs/archive/daily-$(date +%Y%m%d).log",
+        "timeout": 10,
+        "on_error": "continue"
+      },
+      {
+        "name": "cleanup_cache",
+        "command": "rm -rf .claude/.cache/*",
+        "timeout": 10,
+        "on_error": "continue"
+      }
+    ]
+  },
+
+  "settings": {
+    "log_all_hooks": true,
+    "log_directory": ".claude/logs",
+    "retry_policy": "exponential_backoff",
+    "max_concurrent_hooks": 3,
+    "timeout_default": 30,
+    "enable_notifications": false,
+    "enable_git_auto_commit": true,
+    "enable_git_auto_push": true
+  },
+
+  "documentation": {
+    "hook_types": [
+      "before_<agent_name>: 에이전트 시작 전",
+      "after_<agent_name>: 에이전트 완료 후",
+      "on_error: 에러 발생 시",
+      "daily_maintenance: 정기 유지보수"
+    ],
+    "action_properties": {
+      "name": "훅 내에서 고유한 작업 이름",
+      "command": "실행할 bash 명령어",
+      "retry": "실패 시 재시도 횟수 (선택)",
+      "timeout": "실행 타임아웃 (초)",
+      "on_error": "오류 시 처리 방식 (fail/warn/continue)"
+    },
+    "error_handling": {
+      "fail": "오류 발생 → 나머지 훅 중단",
+      "warn": "오류 기록 → 계속 진행",
+      "continue": "오류 무시 → 계속 진행"
+    }
+  }
+}
