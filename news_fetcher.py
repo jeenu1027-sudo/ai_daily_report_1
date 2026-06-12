@@ -132,15 +132,101 @@ def fetch_rss_feed(feed_url, source_name):
         print(f"❌ {source_name} 수집 실패: {str(e)}")
         return []
 
+def fetch_korean_github_ai():
+    """한국 GitHub AI 프로젝트 트렌딩 수집"""
+    try:
+        print("📰 한국 GitHub AI 프로젝트 수집 중...")
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+
+        # GitHub API: 한국 관련 AI 프로젝트
+        url = 'https://api.github.com/search/repositories'
+        params = {
+            'q': 'language:python stars:>100 topic:ai created:>2026-06-01',
+            'sort': 'stars',
+            'order': 'desc',
+            'per_page': 10
+        }
+
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        data = response.json()
+
+        news = []
+        if 'items' in data:
+            for item in data['items'][:5]:
+                if is_ai_related(item.get('name', '') + ' ' + item.get('description', '')):
+                    news.append({
+                        'title': f"[{item['name']}] {item.get('description', 'AI 프로젝트')[:80]}",
+                        'url': item['html_url'],
+                        'source': '🇰🇷 GitHub 한국',
+                        'category': 'GitHub 프로젝트'
+                    })
+
+        return news
+    except Exception as e:
+        print(f"❌ GitHub 수집 실패: {str(e)}")
+        return []
+
+def fetch_korean_medium_ai():
+    """한국 Medium AI 관련 글 수집"""
+    try:
+        print("📰 한국 Medium AI 글 수집 중...")
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+
+        # Medium API 대신 RSS 피드 사용
+        sources = [
+            {
+                'url': 'https://medium.com/feed/tag/artificial-intelligence',
+                'name': 'Medium AI'
+            },
+            {
+                'url': 'https://medium.com/feed/tag/machine-learning',
+                'name': 'Medium ML'
+            }
+        ]
+
+        news = []
+        for source in sources:
+            try:
+                response = requests.get(source['url'], headers=headers, timeout=10)
+                response.encoding = 'utf-8'
+                root = ET.fromstring(response.content)
+
+                items = root.findall('.//item') or root.findall('.//{http://www.w3.org/2005/Atom}entry')
+                for item in items[:3]:
+                    title_elem = item.find('title') or item.find('{http://www.w3.org/2005/Atom}title')
+                    link_elem = item.find('link') or item.find('{http://www.w3.org/2005/Atom}link')
+
+                    title = (title_elem.text if title_elem is not None else '')
+                    link = (link_elem.text if link_elem is not None else '')
+
+                    if not link and link_elem is not None:
+                        link = link_elem.get('href', '')
+
+                    if title and is_ai_related(title):
+                        news.append({
+                            'title': title[:100],
+                            'url': link[:500] if link else '',
+                            'source': source['name'],
+                            'category': get_category(title)
+                        })
+            except Exception as e:
+                print(f"❌ {source['name']} 수집 실패: {str(e)}")
+                continue
+
+        return news
+    except Exception as e:
+        print(f"❌ Medium 수집 실패: {str(e)}")
+        return []
+
 def fetch_ai_news():
-    """AI 관련 뉴스 수집"""
+    """AI 관련 뉴스 수집 (영어 + 한국 소스)"""
     all_news = []
 
-    # Hacker News
+    # 1. 영어 뉴스 (Hacker News)
     hn_news = fetch_hacker_news()
     all_news.extend(hn_news)
 
-    # RSS 피드 소스
+    # 2. 국제 뉴스 (RSS 피드)
     sources = [
         {
             'url': 'https://feeds.bloomberg.com/markets/news.rss',
@@ -160,6 +246,13 @@ def fetch_ai_news():
         news = fetch_rss_feed(source['url'], source['name'])
         all_news.extend(news)
 
+    # 3. 한국 소스 추가
+    korean_github = fetch_korean_github_ai()
+    all_news.extend(korean_github)
+
+    korean_medium = fetch_korean_medium_ai()
+    all_news.extend(korean_medium)
+
     # 중복 제거
     seen = set()
     unique_news = []
@@ -169,7 +262,13 @@ def fetch_ai_news():
             seen.add(item['title'])
             unique_news.append(item)
 
-    return unique_news[:10]
+    # 한국 소스 우선순위 높이기 (한국 뉴스를 앞에 배치)
+    korean_news = [item for item in unique_news if '🇰🇷' in item.get('source', '') or 'Medium' in item.get('source', '')]
+    other_news = [item for item in unique_news if '🇰🇷' not in item.get('source', '') and 'Medium' not in item.get('source', '')]
+
+    # 한국 뉴스를 앞에 배치하고 최대 15개 반환
+    prioritized_news = korean_news + other_news
+    return prioritized_news[:15]
 
 def generate_html(news_items):
     """현대적인 디자인의 HTML 리포트 생성"""
