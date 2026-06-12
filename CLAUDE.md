@@ -24,14 +24,14 @@
 
 ## 📚 사용 가능한 스킬
 
-### 1. `issue-handler` - 통합 이슈 관리 워크플로우 ⭐ 추천
+### 1. `briefing-improver` - 통합 이슈 관리 워크플로우 ⭐ 추천
 
 GitHub 이슈의 생성부터 구현까지 전체 라이프사이클을 자동화합니다.
 
 **사용 예**:
 ```
 사용자: "새 기능을 추가하고 완전히 구현해줘"
-Claude: issue-handler (action=complete) 실행
+Claude: briefing-improver (action=complete) 실행
   1. 이슈 생성
   2. 분석
   3. 계획 수립
@@ -39,13 +39,14 @@ Claude: issue-handler (action=complete) 실행
   5. PR 생성
 ```
 
-**4가지 모드**:
+**5가지 모드**:
 - `create-only`: 이슈 생성만
 - `analyze-only`: 분석만
 - `plan-only`: 계획 수립만
+- `implement-only`: 코드 수정만
 - `complete`: 전체 처리 (완전 자동)
 
-자세한 정보: [issue-handler.md](./.claude/skills/issue-handler.md)
+자세한 정보: [briefing-improver.md](./.claude/skills/briefing-improver.md)
 
 ---
 
@@ -105,5 +106,5 @@ Claude: issue-writer 스킬 실행 → GitHub 이슈 생성
 
 ---
 
-**마지막 업데이트**: 2026-06-11  
+**마지막 업데이트**: 2026-06-12  
 **관리자**: Claude Code

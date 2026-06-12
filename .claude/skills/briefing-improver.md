@@ -1,7 +1,7 @@
-# GitHub Issue Handler Skill
+# GitHub Issue Briefing Improver Skill
 
 ## Metadata
-- **name**: issue-handler
+- **name**: briefing-improver
 - **description**: GitHub 이슈를 생성하고 분석한 후 실제 코드 수정까지 완료하는 완전 자동화 워크플로우
 - **version**: 1.0.0
 
@@ -289,12 +289,11 @@ issue_number=4
 
 | 오류 | 해결 방법 |
 |------|---------|
-| 이슈 없음 | 먼저 `create-only` 실행 |
-| 중복 이슈 | 기존 이슈 번호로 `issue_number` 지정 |
-| 코드 충돌 | 자동으로 main에서 업데이트 후 재시도 |
-| PR 생성 실패 | 권한 확인, gh 인증 상태 확인 |
-
----
+| 이슈 없음 | `gh issue list`로 먼저 확인 |
+| 권한 오류 | GitHub 계정 권한 확인 |
+| 파일 충돌 | `git pull origin main` 후 재시도 |
+| 커밋 실패 | 변경사항 확인 및 스테이징 |
+| PR 생성 실패 | 브랜치명 및 권한 확인 |
 
 ## Best Practices
 
@@ -336,37 +335,26 @@ create → analyze → plan → 검토 → implement
 - 자동 머지
 ```
 
----
+## Workflow Tips
 
-## 성능 지표
+### Tip 1: 우선순위 정렬
+버그 → 기능 → 문서 순으로 처리
 
-| 항목 | 목표 |
-|------|------|
-| 이슈 생성 시간 | < 1분 |
-| 분석 시간 | < 5분 |
-| 계획 수립 시간 | < 10분 |
-| 소규모 버그 수정 | < 30분 |
-| 중규모 기능 추가 | < 2시간 |
-| 복잡한 리팩토링 | > 4시간 (개별 평가) |
+### Tip 2: 의존성 확인
+다른 이슈에 의존하는지 먼저 확인
 
----
+### Tip 3: 테스트 커버리지
+변경 후 관련된 모든 기능 테스트
 
-## 관련 스킬
-
-- 📝 **[issue-writer.md](issue-writer.md)**: 이슈 생성 전문
-- 🔧 **[issue-runner.md](issue-runner.md)**: 이슈 분석 및 수정 전문
-- 🔄 **[issue-handler.md](issue-handler.md)**: 통합 워크플로우 (이 파일)
-
----
+### Tip 4: 코드 리뷰
+자신의 코드를 다시 한 번 검토
 
 ## Links
 
-- 📖 [GitHub 이슈 관리 가이드](https://docs.github.com/en/issues)
-- 🔗 [GitHub CLI 문서](https://cli.github.com/manual/)
-- 📚 [프로젝트 SOUL.md](../../SOUL.md)
-- 🐛 [GitHub Issues](https://github.com/jeenu1027-sudo/ai_daily_report_1/issues)
-
----
+- 📖 [GitHub CLI 이슈 명령어](https://cli.github.com/manual/gh_issue)
+- 🔗 [GitHub 이슈 API](https://docs.github.com/en/rest/issues)
+- 📝 [Git 커밋 가이드](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository)
+- 🐛 [현재 등록된 이슈들](https://github.com/jeenu1027-sudo/ai_daily_report_1/issues)
 
 ## Changelog
 
