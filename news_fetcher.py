@@ -24,6 +24,30 @@ AI_KEYWORDS = [
     'transformer', 'neural network', 'data science', 'automation'
 ]
 
+# 카테고리 매핑 (영어 → 한글)
+CATEGORY_MAPPING = {
+    'gpt': '생성형 AI',
+    'claude': '생성형 AI',
+    'llm': '대형언어모델',
+    'machine learning': '머신러닝',
+    'deep learning': '딥러닝',
+    'neural': '신경망',
+    'transformer': '트랜스포머',
+    'training': '모델 학습',
+    'algorithm': '알고리즘',
+    'data science': '데이터 과학',
+    'automation': '자동화',
+    'model': 'AI 모델'
+}
+
+def get_category(title):
+    """뉴스 제목 기반 한글 카테고리 생성"""
+    title_lower = title.lower()
+    for keyword, category in CATEGORY_MAPPING.items():
+        if keyword in title_lower:
+            return category
+    return 'AI 뉴스'
+
 def is_ai_related(title, description=''):
     """AI 관련 뉴스인지 확인"""
     text = (title + ' ' + description).lower()
@@ -50,7 +74,8 @@ def fetch_hacker_news():
                     news.append({
                         'title': title[:100],
                         'url': url[:500] if url else '',
-                        'source': 'Hacker News'
+                        'source': 'Hacker News',
+                        'category': get_category(title)
                     })
 
         return news[:5]
@@ -98,7 +123,8 @@ def fetch_rss_feed(feed_url, source_name):
                 news.append({
                     'title': title[:100],
                     'url': link[:500] if link else '',
-                    'source': source_name
+                    'source': source_name,
+                    'category': get_category(title)
                 })
 
         return news[:3]
@@ -154,14 +180,18 @@ def generate_html(news_items):
     # 뉴스 HTML 생성
     news_html = ''
     for idx, news in enumerate(news_items, 1):
+        category = news.get('category', 'AI 뉴스')
         news_html += f'''
       <div class="news-item">
         <div class="news-number">{idx}</div>
-        <h3>{news['title']}</h3>
-        <div class="news-meta">
-          <span class="source">{news['source']}</span>
+        <div class="news-content">
+          <div class="news-category">{category}</div>
+          <h3>{news['title']}</h3>
+          <div class="news-meta">
+            <span class="source">{news['source']}</span>
+          </div>
+          {f'<a href="{news["url"]}" target="_blank">기사 보기 →</a>' if news['url'] else ''}
         </div>
-        {f'<a href="{news["url"]}" target="_blank">기사 보기 →</a>' if news['url'] else ''}
       </div>
     '''
 
@@ -340,6 +370,18 @@ def generate_html(news_items):
 
         .news-content {{
             flex: 1;
+        }}
+
+        .news-category {{
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }}
 
         .news-item h3 {{
@@ -573,7 +615,8 @@ def main():
             news_items = [{
                 'title': 'AI 기술이 빠르게 발전하고 있습니다',
                 'url': 'https://example.com',
-                'source': 'Sample'
+                'source': 'Sample',
+                'category': 'AI 뉴스'
             }]
 
         # HTML 생성
